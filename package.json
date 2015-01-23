@@ -1,7 +1,11 @@
 {
   "name": "active-knex",
   "description": "Adding ActiveRecord-esque functionality to knex",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "Sam Duvall <https://github.com/SamDuvall>",
+  "keywords": ["knex", "active", "mysql"],
+
   "main": "index.js",
   "engines": {
     "node": ">=0.10.0"
@@ -21,5 +25,8 @@
     "fibers": "^1.0.5",
     "mocha": "^2.1.0",
     "rosie": "^0.3.1"
+  },
+  "scripts":{
+    "test": "mocha"
   }
 }
