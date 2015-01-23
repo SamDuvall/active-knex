@@ -70,6 +70,12 @@ describe('Schema',function() {
   });
 
   describe('joins', function() {
+    it('should only join once', function(done) {
+      Player.query().joins('teams', 'teams').where('teams.id', team.id).then(function(result) {
+        expect(result).to.have.length(2);
+      }).then(done, done);
+    });
+
     it('should query over a join', function(done) {
       Player.query().whereTeamId(team.id).then(function(result) {
         expect(result).to.have.length(2);
