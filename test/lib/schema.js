@@ -1,0 +1,123 @@
+var _ = require('underscore');
+var expect = require('chai').expect;
+var Factory = require('../factory');
+var Player = require('../examples/player');
+var Team = require('../examples/team');
+
+describe('Schema',function() {
+  var team;
+  var team2;
+  var player;
+  var player2;
+  beforeEachSync(function() {
+    team = Factory.create('team');
+    team2 = Factory.create('team', {archived: true});
+    player = Factory.create('player', {teamId: team.id});
+    player2 = Factory.create('player', {teamId: team.id});
+  });
+
+  describe('fields', function() {
+    it('should populate dates', function() {
+      expect(team.createdAt).to.be.a.Date;
+      expect(team.updatedAt).to.be.a.Date;
+    });
+
+    it('should parse booleans', function() {
+      expect(team.archived).to.be.false;
+      expect(team2.archived).to.be.true;
+    });
+  });
+
+  describe('findById', function() {
+    it('should find a record by ID', function(done) {
+      Team.findById(team.id).then(function(result) {
+        expect(result.id).to.eql(team.id);
+      }).then(done, done);
+    });
+  });
+
+  describe('removeById', function() {
+    it('should remove a record by ID', function(done) {
+      Team.removeById(team2.id).then(function() {
+        return Team.query();
+      }).then(function(teams) {
+        var ids = _.pluck(teams, 'id');
+        expect(ids).to.eql([1]);
+      }).then(done, done);
+    });
+  });
+
+  describe('findOrCreate', function() {
+    it('should find a record', function(done) {
+      Team.findOrCreate({name: team.name}).then(function(result) {
+        expect(result.id).to.eql(team.id);
+      }).then(done, done);
+    });
+
+    it('should create a record', function(done) {
+      Team.findOrCreate({name: 'New Name'}).then(function(result) {
+        expect(result.id).to.not.eql(team.id);
+      }).then(done, done);
+    });
+  });
+
+  describe('query', function() {
+    it('should create a custom query in the query builder', function(done) {
+      Team.query().findByName(team.name).then(function(result) {
+        expect(result.id).to.eql(team.id);
+      }).then(done, done);
+    });
+  });
+
+  describe('joins', function() {
+    it('should query over a join', function(done) {
+      Player.query().whereTeamId(team.id).then(function(result) {
+        expect(result).to.have.length(2);
+      }).then(done, done);
+    });
+  });
+
+  describe('load', function() {
+    it('should load hasMany', function(done) {
+      Team.load(team, 'players').then(function(team) {
+        expect(team.players).to.have.length(2);
+      }).then(done, done);
+    });
+  });
+
+  describe('events', function() {
+    it('should trigger create events', function(done) {
+      var beforeCount = 0;
+      Team.before('create', function() {
+        beforeCount += 1;
+      });
+
+      var afterCount = 0;
+      Team.after('create', function() {
+        afterCount += 1;
+      });
+
+      Team.create({name: 'New Name'}).then(function() {
+        expect(beforeCount).to.eql(1);
+        expect(afterCount).to.eql(1);
+      }).then(done, done);
+    });
+
+    it('should trigger update events', function(done) {
+      var beforeCount = 0;
+      Team.before('update', function() {
+        beforeCount += 1;
+      });
+
+      var afterCount = 0;
+      Team.after('update', function() {
+        afterCount += 1;
+      });
+
+      Team.update(team, {name: 'New Name'}).then(function() {
+        expect(beforeCount).to.eql(1);
+        expect(afterCount).to.eql(1);
+      }).then(done, done);
+    });
+  });
+});

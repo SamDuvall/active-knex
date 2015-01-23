@@ -1,0 +1,25 @@
+{
+  "name": "active-knex",
+  "description": "Adding ActiveRecord-esque functionality to knex",
+  "version": "0.0.1",
+  "main": "index.js",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:SamDuvall/active-knex.git"
+  },
+  "dependencies": {
+    "knex": "SamDuvall/knex",
+    "mysql": "^2.5.4",
+    "underscore": "^1.7.0",
+    "underscore.string": "^3.0.1"
+  },
+  "devDependencies": {
+    "chai": "^1.10.0",
+    "fibers": "^1.0.5",
+    "mocha": "^2.1.0",
+    "rosie": "^0.3.1"
+  }
+}
