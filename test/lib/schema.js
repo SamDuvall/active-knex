@@ -61,6 +61,22 @@ describe('Schema',function() {
     });
   });
 
+  describe('updateOrCreate', function() {
+    it('should update a record', function(done) {
+      Team.updateOrCreate({name: team.name, archived: true}).then(function(result) {
+        expect(result.id).to.eql(team.id);
+        expect(result.archived).to.be.true;
+      }).then(done, done);
+    });
+
+    it('should create a record', function(done) {
+      Team.updateOrCreate({name: 'New Name', archived: true}).then(function(result) {
+        expect(result.id).to.not.eql(team.id);
+        expect(result.archived).to.be.true;
+      }).then(done, done);
+    });
+  });
+
   describe('query', function() {
     it('should create a custom query in the query builder', function(done) {
       Team.query().findByName(team.name).then(function(result) {
