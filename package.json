@@ -1,7 +1,7 @@
 {
   "name": "active-knex",
   "description": "Adding ActiveRecord-esque functionality to knex",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "license": "MIT",
   "author": "Sam Duvall <https://github.com/SamDuvall>",
   "keywords": ["knex", "active", "mysql"],
