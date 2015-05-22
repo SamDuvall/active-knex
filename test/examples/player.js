@@ -6,6 +6,7 @@ var Player = ActiveKnex.Schema.create(knex, {
   tableName: 'players',
 
   fields: {
+    stats: { type: 'json' },
     createdAt: true,
     updatedAt: true
   },

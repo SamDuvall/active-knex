@@ -12,7 +12,13 @@ describe('Schema',function() {
   beforeEachSync(function() {
     team = Factory.create('team');
     team2 = Factory.create('team', {archived: true});
-    player = Factory.create('player', {teamId: team.id});
+    player = Factory.create('player', {
+      teamId: team.id,
+      stats: {
+        slugging: 0.456,
+        bases: [1,2,3]
+      }
+    });
     player2 = Factory.create('player', {teamId: team.id});
   });
 
@@ -25,6 +31,14 @@ describe('Schema',function() {
     it('should parse booleans', function() {
       expect(team.archived).to.be.false;
       expect(team2.archived).to.be.true;
+    });
+
+    it('should parse json', function() {
+      expect(player.stats).to.eql({
+        slugging: 0.456,
+        bases: [1,2,3]
+      });
+      expect(player2.stats).to.be.undefined;
     });
   });
 
