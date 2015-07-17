@@ -11,6 +11,21 @@ describe('Schema',function() {
     });
   });
 
+  describe('defer', function() {
+    it('should run a deferred operation', function(done) {
+      Team.query().defer(function(qb) {
+        return Team.query().then(function(teams) {
+          var ids = _.pluck(teams, 'id');
+          var id = _.first(ids);
+          qb.where('id', id);
+        });
+      }).limit(2).then(function(result) {
+        var names = _.pluck(result, 'name');
+        expect(names).to.eql(['Team 1']);
+      }).then(done, done);
+    });
+  });
+
   describe('after', function() {
     it('should return the 1st 2 teams', function(done) {
       Team.query().after('name').limit(2).then(function(result) {
