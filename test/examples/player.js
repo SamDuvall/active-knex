@@ -34,4 +34,8 @@ var Player = ActiveKnex.Schema.create(knex, {
   }
 });
 
+Player.before('save', function(player) {
+  if (player.email) player.email = player.email.toLowerCase();
+});
+
 module.exports = Player;

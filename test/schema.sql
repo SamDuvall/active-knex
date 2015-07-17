@@ -25,6 +25,7 @@ DROP TABLE IF EXISTS `players`;
 CREATE TABLE `players` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `team_id` int(10) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,

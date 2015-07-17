@@ -124,16 +124,17 @@ describe('Schema',function() {
   describe('events', function() {
     it('should trigger create events', function(done) {
       var beforeCount = 0;
-      Team.before('create', function() {
+      Player.before('create', function() {
         beforeCount += 1;
       });
 
       var afterCount = 0;
-      Team.after('create', function() {
+      Player.after('create', function() {
         afterCount += 1;
       });
 
-      Team.create({name: 'New Name'}).then(function() {
+      Player.create({email: 'A@A.COM', name: 'New Name'}).then(function(player) {
+        expect(player.email).to.eql('a@a.com');
         expect(beforeCount).to.eql(1);
         expect(afterCount).to.eql(1);
       }).then(done, done);
@@ -141,16 +142,17 @@ describe('Schema',function() {
 
     it('should trigger update events', function(done) {
       var beforeCount = 0;
-      Team.before('update', function() {
+      Player.before('update', function() {
         beforeCount += 1;
       });
 
       var afterCount = 0;
-      Team.after('update', function() {
+      Player.after('update', function() {
         afterCount += 1;
       });
 
-      Team.update(team, {name: 'New Name'}).then(function() {
+      Player.update(team, {email: 'A@A.COM', name: 'New Name'}).then(function(player) {
+        expect(player.email).to.eql('a@a.com');
         expect(beforeCount).to.eql(1);
         expect(afterCount).to.eql(1);
       }).then(done, done);
