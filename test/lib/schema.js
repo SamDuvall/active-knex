@@ -61,6 +61,23 @@ describe('Schema',function() {
     });
   });
 
+  describe('create', function() {
+    it('create a single record', function(done) {
+      Team.create({name: team.name}).then(function(result) {
+        expect(result.id).to.not.be.undefined;
+      }).then(done, done);
+    });
+
+    it('create multiple records', function(done) {
+      Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}]).then(function(result) {
+        var first = _.first(result);
+        var last = _.last(result);
+        expect(result).to.have.length(3);
+        expect(last.id - first.id).to.eql(2);
+      }).then(done, done);
+    });
+  });
+
   describe('findOrCreate', function() {
     it('should find a record', function(done) {
       Team.findOrCreate({name: team.name}).then(function(result) {
