@@ -62,6 +62,12 @@ describe('Schema',function() {
   });
 
   describe('create', function() {
+    it('create no records', function(done) {
+      Team.create([]).then(function(result) {
+        expect(result).to.be.empty;
+      }).then(done, done);
+    });
+
     it('create a single record', function(done) {
       Team.create({name: team.name}).then(function(result) {
         expect(result.id).to.not.be.undefined;
