@@ -25,4 +25,7 @@ Factory.define('player', Player)
 Factory.define('team', Team)
   .sequence('name', function(i) { return 'Team #' + i})
 
+Factory.define('team.bus', Team.Bus)
+  .sequence('driver', function(i) { return 'Bus Driver #' + i})
+
 module.exports = Factory;

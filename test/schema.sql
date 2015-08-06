@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.6.24, for osx10.10 (x86_64)
+-- MySQL dump 10.13  Distrib 5.6.25, for osx10.10 (x86_64)
 --
 -- Host: localhost    Database: knex
 -- ------------------------------------------------------
--- Server version	5.6.22
+-- Server version	5.6.25
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -35,6 +35,20 @@ CREATE TABLE `players` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `team_buses`
+--
+
+DROP TABLE IF EXISTS `team_buses`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `team_buses` (
+  `team_id` int(10) unsigned NOT NULL,
+  `driver` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`team_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `teams`
 --
 
@@ -60,4 +74,4 @@ CREATE TABLE `teams` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-05-22 12:57:34
+-- Dump completed on 2015-08-06 17:02:42

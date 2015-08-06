@@ -7,11 +7,15 @@ var Team = require('../examples/team');
 describe('Schema',function() {
   var team;
   var team2;
+  var teamBus;
   var player;
   var player2;
   beforeEachSync(function() {
     team = Factory.create('team');
     team2 = Factory.create('team', {archived: true});
+
+    teamBus = Factory.create('team.bus', {teamId: team.id})
+
     player = Factory.create('player', {
       teamId: team.id,
       stats: {
@@ -48,6 +52,12 @@ describe('Schema',function() {
         expect(result.id).to.eql(team.id);
       }).then(done, done);
     });
+
+    it('should find a record by a ID (custom primaryKey)', function(done) {
+      Team.Bus.findById(team.id).then(function(result) {
+        expect(result.teamId).to.eql(team.id);
+      }).then(done, done);
+    });
   });
 
   describe('removeById', function() {
@@ -57,6 +67,14 @@ describe('Schema',function() {
       }).then(function(teams) {
         var ids = _.pluck(teams, 'id');
         expect(ids).to.eql([1]);
+      }).then(done, done);
+    });
+
+    it('should remove a record by ID (custom primaryKey)', function(done) {
+      Team.Bus.removeById(team.id).then(function() {
+        return Team.Bus.query();
+      }).then(function(buses) {
+        expect(buses).to.be.empty;
       }).then(done, done);
     });
   });
@@ -80,6 +98,20 @@ describe('Schema',function() {
         var last = _.last(result);
         expect(result).to.have.length(3);
         expect(last.id - first.id).to.eql(2);
+      }).then(done, done);
+    });
+  });
+
+  describe('update', function() {
+    it('should update a record', function(done) {
+      Team.update(team, {archived: true}).then(function(result) {
+        expect(team.archived).to.be.true;
+      }).then(done, done);
+    });
+
+    it('should create a record (custom primaryKey)', function(done) {
+      Team.Bus.update(teamBus, {driver: 'New Driver'}).then(function(result) {
+        expect(teamBus.driver).to.equal('New Driver');
       }).then(done, done);
     });
   });

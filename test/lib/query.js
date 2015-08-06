@@ -3,7 +3,7 @@ var expect = require('chai').expect;
 var Factory = require('../factory');
 var Team = require('../examples/team');
 
-describe('Schema',function() {
+describe('Query',function() {
   var teams;
   beforeEachSync(function() {
     teams = _.times(5, function(index) {
