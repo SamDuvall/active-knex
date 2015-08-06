@@ -102,15 +102,19 @@ describe('Schema',function() {
     });
   });
 
-  describe('update', function() {
+  describe('update tacos', function() {
     it('should update a record', function(done) {
       Team.update(team, {archived: true}).then(function(result) {
+        return Team.findById(team.id);
+      }).then(function(team) {
         expect(team.archived).to.be.true;
       }).then(done, done);
     });
 
     it('should create a record (custom primaryKey)', function(done) {
       Team.Bus.update(teamBus, {driver: 'New Driver'}).then(function(result) {
+        return Team.Bus.findById(teamBus.teamId);
+      }).then(function(teamBus) {
         expect(teamBus.driver).to.equal('New Driver');
       }).then(done, done);
     });
