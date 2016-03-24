@@ -173,6 +173,12 @@ describe('Schema',function() {
   });
 
   describe('load', function() {
+    it('should load belongsTo', function(done) {
+      Player.load(player, 'team').then(function(player) {
+        expect(player.team.id).to.eql(team.id)
+      }).then(done, done);
+    });
+
     it('should load hasMany', function(done) {
       Team.load(team, 'players').then(function(team) {
         expect(team.players).to.have.length(2);
@@ -192,7 +198,7 @@ describe('Schema',function() {
         afterCount += 1;
       });
 
-      Player.create({email: 'A@A.COM', name: 'New Name'}).then(function(player) {
+      Player.create({teamId: team.id, email: 'A@A.COM', name: 'New Name'}).then(function(player) {
         expect(player.email).to.eql('a@a.com');
         expect(beforeCount).to.eql(1);
         expect(afterCount).to.eql(1);
