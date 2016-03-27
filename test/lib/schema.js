@@ -42,7 +42,7 @@ describe('Schema',function() {
         slugging: 0.456,
         bases: [1,2,3]
       });
-      expect(player2.stats).to.be.undefined;
+      expect(player2.stats).to.be.null;
     });
   });
 
@@ -102,7 +102,7 @@ describe('Schema',function() {
     });
   });
 
-  describe('update tacos', function() {
+  describe('update', function() {
     it('should update a record', function(done) {
       Team.update(team, {archived: true}).then(function(result) {
         return Team.findById(team.id);

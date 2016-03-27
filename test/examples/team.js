@@ -37,7 +37,7 @@ var Team = ActiveKnex.Schema.create(knex, {
 
 Team.Bus = ActiveKnex.Schema.create(knex, {
   tableName: 'team_buses',
-  primaryKey: 'team_id'
+  primaryKey: 'teamId'
 });
 
 module.exports = Team;
