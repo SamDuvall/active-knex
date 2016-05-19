@@ -80,6 +80,26 @@ describe('Query',function() {
     });
   });
 
+  describe('orderBy', function() {
+    it('be ASC with no direction', function(done) {
+      Team.query().orderBy('name').first().then(function(team) {
+        expect(team.name).to.eql('Team 1')
+      }).then(done, done);
+    });
+
+    it('be DESC with direction', function(done) {
+      Team.query().orderBy('name', 'desc').first().then(function(team) {
+        expect(team.name).to.eql('Team 5')
+      }).then(done, done);
+    });
+
+    it('be DESC with -', function(done) {
+      Team.query().orderBy('-name').first().then(function(team) {
+        expect(team.name).to.eql('Team 5')
+      }).then(done, done);
+    });
+  });
+
   describe('after', function() {
     it('should return the 1st 2 teams', function(done) {
       Team.query().after('name').limit(2).then(function(result) {
@@ -89,7 +109,10 @@ describe('Query',function() {
     });
 
     it('should return the 2nd 2 teams', function(done) {
-      Team.query().after('teams.name', 2).limit(2).then(function(result) {
+      Team.query().after('name').limit(2).then(function(result) {
+        var last = _.last(result);
+        return Team.query().after('name', last.name, last.id).limit(2);
+      }).then(function(result) {
         var names = _.pluck(result, 'name');
         expect(names).to.eql(['Team 3', 'Team 4']);
       }).then(done, done);
@@ -103,7 +126,10 @@ describe('Query',function() {
     });
 
     it('should return the 2nd to Last 2 teams', function(done) {
-      Team.query().after('-teams.name', 4).limit(2).then(function(result) {
+      Team.query().after('-name', 4).limit(2).then(function(result) {
+        var last = _.last(result);
+        return Team.query().after('-name', last.name, last.id).limit(2);
+      }).then(function(result) {
         var names = _.pluck(result, 'name');
         expect(names).to.eql(['Team 3', 'Team 2']);
       }).then(done, done);
