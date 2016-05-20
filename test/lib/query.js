@@ -101,38 +101,113 @@ describe('Query',function() {
   });
 
   describe('after', function() {
-    it('should return the 1st 2 teams', function(done) {
-      Team.query().after('name').limit(2).then(function(result) {
-        var names = _.pluck(result, 'name');
-        expect(names).to.eql(['Team 1', 'Team 2']);
-      }).then(done, done);
+    describe('no nulls', function() {
+      it('should return the 1st 2 teams', function(done) {
+        Team.query().after('name').limit(2).then(function(result) {
+          var names = _.pluck(result, 'name');
+          expect(names).to.eql(['Team 1', 'Team 2']);
+        }).then(done, done);
+      });
+
+      it('should return the 2nd 2 teams', function(done) {
+        Team.query().after('name').limit(2).then(function(result) {
+          var last = _.last(result);
+          return Team.query().after('name', last.name, last.id).limit(2);
+        }).then(function(result) {
+          var names = _.pluck(result, 'name');
+          expect(names).to.eql(['Team 3', 'Team 4']);
+        }).then(done, done);
+      });
+
+      it('should return the Last 2 teams', function(done) {
+        Team.query().after('-name').limit(2).then(function(result) {
+          var names = _.pluck(result, 'name');
+          expect(names).to.eql(['Team 5', 'Team 4']);
+        }).then(done, done);
+      });
+
+      it('should return the 2nd to Last 2 teams', function(done) {
+        Team.query().after('-name', 4).limit(2).then(function(result) {
+          var last = _.last(result);
+          return Team.query().after('-name', last.name, last.id).limit(2);
+        }).then(function(result) {
+          var names = _.pluck(result, 'name');
+          expect(names).to.eql(['Team 3', 'Team 2']);
+        }).then(done, done);
+      });
     });
 
-    it('should return the 2nd 2 teams', function(done) {
-      Team.query().after('name').limit(2).then(function(result) {
-        var last = _.last(result);
-        return Team.query().after('name', last.name, last.id).limit(2);
-      }).then(function(result) {
-        var names = _.pluck(result, 'name');
-        expect(names).to.eql(['Team 3', 'Team 4']);
-      }).then(done, done);
-    });
+    describe('with nulls', function() {
+      var nullTeams;
+      beforeEachSync(function() {
+        nullTeams = _.times(3, function(index) {
+          return Factory.create('team', {name: null});
+        });
+      });
 
-    it('should return the Last 2 teams', function(done) {
-      Team.query().after('-name').limit(2).then(function(result) {
-        var names = _.pluck(result, 'name');
-        expect(names).to.eql(['Team 5', 'Team 4']);
-      }).then(done, done);
-    });
+      it('should return the 1st 2 teams', function(done) {
+        Team.query().after('name').limit(2).then(function(result) {
+          var names = _.pluck(result, 'name');
+          expect(names).to.eql([null, null]);
+        }).then(done, done);
+      });
 
-    it('should return the 2nd to Last 2 teams', function(done) {
-      Team.query().after('-name', 4).limit(2).then(function(result) {
-        var last = _.last(result);
-        return Team.query().after('-name', last.name, last.id).limit(2);
-      }).then(function(result) {
-        var names = _.pluck(result, 'name');
-        expect(names).to.eql(['Team 3', 'Team 2']);
-      }).then(done, done);
+      it('should return the 2nd 2 teams', function(done) {
+        Team.query().after('name').limit(2).then(function(result) {
+          var last = _.last(result);
+          return Team.query().after('name', last.name, last.id).limit(2);
+        }).then(function(result) {
+          var names = _.pluck(result, 'name');
+          expect(names).to.eql([null, 'Team 1']);
+        }).then(done, done);
+      });
+
+      it('should return the 3rd 2 teams', function(done) {
+        Team.query().after('name').limit(4).then(function(result) {
+          var last = _.last(result);
+          return Team.query().after('name', last.name, last.id).limit(2);
+        }).then(function(result) {
+          var names = _.pluck(result, 'name');
+          expect(names).to.eql(['Team 2', 'Team 3']);
+        }).then(done, done);
+      });
+
+      it('should return the Last 2 teams', function(done) {
+        Team.query().after('-name').limit(2).then(function(result) {
+          var names = _.pluck(result, 'name');
+          expect(names).to.eql(['Team 5', 'Team 4']);
+        }).then(done, done);
+      });
+
+      it('should return the 2nd to Last 2 teams', function(done) {
+        Team.query().after('-name', 4).limit(2).then(function(result) {
+          var last = _.last(result);
+          return Team.query().after('-name', last.name, last.id).limit(2);
+        }).then(function(result) {
+          var names = _.pluck(result, 'name');
+          expect(names).to.eql(['Team 3', 'Team 2']);
+        }).then(done, done);
+      });
+
+      it('should return the 3rd to Last 2 teams', function(done) {
+        Team.query().after('-name', 4).limit(4).then(function(result) {
+          var last = _.last(result);
+          return Team.query().after('-name', last.name, last.id).limit(2);
+        }).then(function(result) {
+          var names = _.pluck(result, 'name');
+          expect(names).to.eql(['Team 1', null]);
+        }).then(done, done);
+      });
+
+      it('should return the 4th to Last 2 teams', function(done) {
+        Team.query().after('-name', 4).limit(6).then(function(result) {
+          var last = _.last(result);
+          return Team.query().after('-name', last.name, last.id).limit(2);
+        }).then(function(result) {
+          var names = _.pluck(result, 'name');
+          expect(names).to.eql([null, null]);
+        }).then(done, done);
+      });
     });
   });
 });
