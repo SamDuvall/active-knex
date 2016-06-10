@@ -19,8 +19,8 @@ var Team = ActiveKnex.Schema.create(knex, {
   },
 
   queries: {
-    findByName: function(name) {
-      return this.where('teams.name', name).first();
+    whereName: function(name) {
+      return this.where('teams.name', name);
     }
   },
 
@@ -34,6 +34,10 @@ var Team = ActiveKnex.Schema.create(knex, {
     }
   }
 });
+
+Team.findByName = function(name) {
+  return this.query().whereName(name).first();
+};
 
 Team.Bus = ActiveKnex.Schema.create(knex, {
   tableName: 'team_buses',

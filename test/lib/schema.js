@@ -3,6 +3,7 @@ var expect = require('chai').expect;
 var Factory = require('../factory');
 var Player = require('../examples/player');
 var Team = require('../examples/team');
+var knex = require('../knex');
 
 describe('Schema',function() {
   var team;
@@ -80,57 +81,191 @@ describe('Schema',function() {
   });
 
   describe('create', function() {
-    it('create no records', function(done) {
-      Team.create([]).then(function(result) {
-        expect(result).to.be.empty;
-      }).then(done, done);
+    describe('no transaction', function() {
+      it('should create no records', function(done) {
+        Team.create([]).then(function(teams) {
+          expect(teams).to.be.empty;
+        }).then(done, done);
+      });
+
+      it('should create a single record', function(done) {
+        Team.create({name: 'Team Name'}).then(function(team) {
+          expect(team.id).to.not.be.undefined;
+          expect(team.name).to.eql('Team Name');
+        }).then(done, done);
+      });
+
+      it('should create multiple records', function(done) {
+        Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}]).then(function(teams) {
+          var first = _.first(teams);
+          var last = _.last(teams);
+          expect(teams).to.have.length(3);
+          expect(last.id - first.id).to.eql(2);
+        }).then(done, done);
+      });
     });
 
-    it('create a single record', function(done) {
-      Team.create({name: team.name}).then(function(result) {
-        expect(result.id).to.not.be.undefined;
-      }).then(done, done);
+    describe('commit transaction', function() {
+      it('should create a single record', function(done) {
+        knex.transaction(function(trx) {
+          return Team.create({name: 'Team Name'}, trx).then(function(team) {
+            expect(team.id).to.not.be.undefined;
+            expect(team.name).to.eql('Team Name');
+          }).then(trx.commit);
+        }).then(function() {
+          return Team.findByName('Team Name');
+        }).then(function(team) {
+          expect(team).to.not.be.undefined;
+        }).then(done, done);
+      });
+
+      it('should create multiple records', function(done) {
+        knex.transaction(function(trx) {
+          return Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}], trx).then(function(teams) {
+            var first = _.first(teams);
+            var last = _.last(teams);
+            expect(teams).to.have.length(3);
+            expect(last.id - first.id).to.eql(2);
+          }).then(trx.commit);
+        }).then(function() {
+          return Team.query();
+        }).then(function(teams) {
+          expect(teams).to.have.length(5);
+        }).then(done, done);
+      });
     });
 
-    it('create multiple records', function(done) {
-      Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}]).then(function(result) {
-        var first = _.first(result);
-        var last = _.last(result);
-        expect(result).to.have.length(3);
-        expect(last.id - first.id).to.eql(2);
-      }).then(done, done);
+    describe('rollback transaction', function() {
+      it('should NOT create a single record', function(done) {
+        knex.transaction(function(trx) {
+          return Team.create({name: 'Team Name'}, trx).then(function(team) {
+            expect(team.id).to.not.be.undefined;
+            expect(team.name).to.eql('Team Name');
+          }).then(trx.rollback);
+        }).catch(function(err) {
+          expect(err).to.be.undefined;
+          return Team.findByName('Team Name');
+        }).then(function(team) {
+          expect(team).to.be.undefined;
+        }).then(done, done);
+      });
+
+      it('should NOT create multiple records', function(done) {
+        knex.transaction(function(trx) {
+          return Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}], trx).then(function(teams) {
+            var first = _.first(teams);
+            var last = _.last(teams);
+            expect(teams).to.have.length(3);
+            expect(last.id - first.id).to.eql(2);
+          }).then(trx.rollback);
+        }).catch(function(err) {
+          expect(err).to.be.undefined;
+          return Team.query();
+        }).then(function(teams) {
+          expect(teams).to.have.length(2);
+        }).then(done, done);
+      });
     });
   });
 
   describe('update', function() {
-    it('should update a record', function(done) {
-      Team.update(team, {archived: true}).then(function(result) {
-        return Team.findById(team.id);
-      }).then(function(team) {
-        expect(team.archived).to.be.true;
-      }).then(done, done);
+    describe('no transaction', function() {
+      it('should update a record', function(done) {
+        Team.update(team, {archived: true}).then(function(result) {
+          return Team.findById(team.id);
+        }).then(function(team) {
+          expect(team.archived).to.be.true;
+        }).then(done, done);
+      });
+
+      it('should create a record (custom primaryKey)', function(done) {
+        Team.Bus.update(teamBus, {driver: 'New Driver'}).then(function(result) {
+          return Team.Bus.findById(teamBus.teamId);
+        }).then(function(teamBus) {
+          expect(teamBus.driver).to.equal('New Driver');
+        }).then(done, done);
+      });
     });
 
-    it('should create a record (custom primaryKey)', function(done) {
-      Team.Bus.update(teamBus, {driver: 'New Driver'}).then(function(result) {
-        return Team.Bus.findById(teamBus.teamId);
-      }).then(function(teamBus) {
-        expect(teamBus.driver).to.equal('New Driver');
-      }).then(done, done);
+    describe('commit transaction', function() {
+      it('should update a record', function(done) {
+        knex.transaction(function(trx) {
+          return Team.update(team, {name: 'New Name'}, trx).then(function(team) {
+            expect(team.name).to.eql('New Name');
+          }).then(trx.commit);
+        }).then(function() {
+          return Team.findByName('New Name');
+        }).then(function(team) {
+          expect(team).to.not.be.undefined;
+        }).then(done, done);
+      });
+    });
+
+    describe('rollback transaction', function() {
+      it('should NOT update a record', function(done) {
+        knex.transaction(function(trx) {
+          return Team.update(team, {name: 'New Name'}, trx).then(function(team) {
+            expect(team.name).to.eql('New Name');
+          }).then(trx.rollback);
+        }).catch(function() {
+          return Team.findByName('New Name');
+        }).then(function(team) {
+          expect(team).to.be.undefined;
+        }).then(done, done);
+      });
     });
   });
 
   describe('findOrCreate', function() {
-    it('should find a record', function(done) {
-      Team.findOrCreate({name: team.name}).then(function(result) {
-        expect(result.id).to.eql(team.id);
-      }).then(done, done);
+    describe('no transaction', function() {
+      it('should find a record', function(done) {
+        Team.findOrCreate({name: team.name}).then(function(result) {
+          expect(result.id).to.eql(team.id);
+        }).then(done, done);
+      });
+
+      it('should create a record', function(done) {
+        Team.findOrCreate({name: 'New Name'}).then(function(result) {
+          expect(result.id).to.not.eql(team.id);
+        }).then(done, done);
+      });
     });
 
-    it('should create a record', function(done) {
-      Team.findOrCreate({name: 'New Name'}).then(function(result) {
-        expect(result.id).to.not.eql(team.id);
-      }).then(done, done);
+    describe('commit transaction', function() {
+      it('should find a record', function(done) {
+        knex.transaction(function(trx) {
+          return Team.findOrCreate({name: team.name}, trx).then(function(result) {
+            expect(result.id).to.eql(team.id);
+          }).then(trx.commit);
+        }).then(done, done);
+      });
+
+      it('should create a record', function(done) {
+        knex.transaction(function(trx) {
+          return Team.findOrCreate({name: 'Team Name'}, trx).then(function(result) {
+            expect(result.id).to.not.eql(team.id);
+          }).then(trx.commit);
+        }).then(function() {
+          return Team.findByName('Team Name');
+        }).then(function(team) {
+          expect(team).to.not.be.undefined;
+        }).then(done, done);
+      });
+    });
+
+    describe('rollback transaction', function() {
+      it('should NOT create a record', function(done) {
+        knex.transaction(function(trx) {
+          return Team.findOrCreate({name: 'Team Name'}, trx).then(function(result) {
+            expect(result.id).to.not.eql(team.id);
+          }).then(trx.rollback);
+        }).catch(function(err) {
+          expect(err).to.be.undefined;
+          return Team.findByName('Team Name');
+        }).then(function(team) {
+          expect(team).to.be.undefined;
+        }).then(done, done);
+      });
     });
   });
 
@@ -152,8 +287,8 @@ describe('Schema',function() {
 
   describe('query', function() {
     it('should create a custom query in the query builder', function(done) {
-      Team.query().findByName(team.name).then(function(result) {
-        expect(result.id).to.eql(team.id);
+      Team.query().whereName(team.name).first().then(function(team) {
+        expect(team.id).to.eql(team.id);
       }).then(done, done);
     });
   });
