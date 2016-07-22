@@ -81,22 +81,60 @@ describe('Query',function() {
   });
 
   describe('orderBy', function() {
-    it('be ASC with no direction', function(done) {
-      Team.query().orderBy('name').first().then(function(team) {
-        expect(team.name).to.eql('Team 1')
-      }).then(done, done);
+    describe('single column', function() {
+      it('be ASC with no direction', function(done) {
+        Team.query().orderBy('name').first().then(function(team) {
+          expect(team.name).to.eql('Team 1');
+        }).then(done, done);
+      });
+
+      it('be DESC with direction', function(done) {
+        Team.query().orderBy('name', 'desc').first().then(function(team) {
+          expect(team.name).to.eql('Team 5');
+        }).then(done, done);
+      });
+
+      it('be DESC with -', function(done) {
+        Team.query().orderBy('-name').first().then(function(team) {
+          expect(team.name).to.eql('Team 5');
+        }).then(done, done);
+      });
     });
 
-    it('be DESC with direction', function(done) {
-      Team.query().orderBy('name', 'desc').first().then(function(team) {
-        expect(team.name).to.eql('Team 5')
-      }).then(done, done);
-    });
+    describe('multiple columns', function() {
+      beforeEachSync(function() {
+        _.times(5, function(index) {
+          return Factory.create('team', {name: 'Team ' + (index + 1), archived: true});
+        });
+      });
 
-    it('be DESC with -', function(done) {
-      Team.query().orderBy('-name').first().then(function(team) {
-        expect(team.name).to.eql('Team 5')
-      }).then(done, done);
+      it('be ASC/ASC', function(done) {
+        Team.query().orderBy(['name', 'archived']).first().then(function(team) {
+          expect(team.name).to.eql('Team 1');
+          expect(team.archived).to.be.false;
+        }).then(done, done);
+      });
+
+      it('be ASC/DESC', function(done) {
+        Team.query().orderBy(['name', '-archived']).first().then(function(team) {
+          expect(team.name).to.eql('Team 1');
+          expect(team.archived).to.be.true;
+        }).then(done, done);
+      });
+
+      it('be DESC/ASC', function(done) {
+        Team.query().orderBy(['-name', 'archived']).first().then(function(team) {
+          expect(team.name).to.eql('Team 5');
+          expect(team.archived).to.be.false;
+        }).then(done, done);
+      });
+
+      it('be DESC/DESC', function(done) {
+        Team.query().orderBy(['-name', '-archived']).first().then(function(team) {
+          expect(team.name).to.eql('Team 5');
+          expect(team.archived).to.be.true;
+        }).then(done, done);
+      });
     });
   });
 
@@ -138,11 +176,11 @@ describe('Query',function() {
     });
 
     describe('with nulls', function() {
-      var nullTeams;
       beforeEachSync(function() {
-        nullTeams = _.times(3, function(index) {
+        var moreTeams = _.times(3, function(index) {
           return Factory.create('team', {name: null});
         });
+        teams = _.union(teams, moreTeams);
       });
 
       it('should return the 1st 2 teams', function(done) {
@@ -206,6 +244,39 @@ describe('Query',function() {
         }).then(function(result) {
           var names = _.pluck(result, 'name');
           expect(names).to.eql([null, null]);
+        }).then(done, done);
+      });
+    });
+
+    describe('multiple columns', function() {
+      var columns = ['name', '-archived'];
+
+      beforeEachSync(function() {
+        var moreTeams = _.times(5, function(index) {
+          return Factory.create('team', {name: 'Team ' + (index + 1), archived: true});
+        });
+        teams = _.union(teams, moreTeams);
+      });
+
+      it('should return the 1st 3 teams', function(done) {
+        Team.query().after(columns).limit(3).then(function(result) {
+          var names = _.pluck(result, 'name');
+          var archiveds = _.pluck(result, 'archived');
+          expect(names).to.eql(['Team 1', 'Team 1', 'Team 2']);
+          expect(archiveds).to.eql([true, false, true]);
+        }).then(done, done);
+      });
+
+      it('should return the 2nd 3 teams tacos', function(done) {
+        Team.query().after(columns).limit(3).then(function(result) {
+          var last = _.last(result);
+          var lastValues = [last.name, last.archived];
+          return Team.query().after(columns, lastValues, last.id).limit(3);
+        }).then(function(result) {
+          var names = _.pluck(result, 'name');
+          var archiveds = _.pluck(result, 'archived');
+          expect(names).to.eql(['Team 2', 'Team 3', 'Team 3']);
+          expect(archiveds).to.eql([false, true, false]);
         }).then(done, done);
       });
     });
