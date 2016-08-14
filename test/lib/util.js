@@ -12,10 +12,10 @@ describe('util',function() {
     it('convert everything to an array', function() {
       // Empty
       expect(arrayify()).to.eql([]);
-      expect(arrayify(null)).to.eql([]);
       expect(arrayify(undefined)).to.eql([]);
 
       // Value
+      expect(arrayify(null)).to.eql([null]);
       expect(arrayify(0)).to.eql([0]);
       expect(arrayify(1)).to.eql([1]);
       expect(arrayify('test')).to.eql(['test']);

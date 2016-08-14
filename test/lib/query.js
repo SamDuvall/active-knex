@@ -136,6 +136,28 @@ describe('Query',function() {
         }).then(done, done);
       });
     });
+
+    describe('custom ordering', function() {
+      beforeEachSync(function() {
+        _.times(5, function(index) {
+          return Factory.create('team', {name: 'Team ' + (index + 1), archived: true});
+        });
+      });
+
+      it('be ASC', function(done) {
+        Team.query().orderBy('custom').first().then(function(team) {
+          expect(team.name).to.eql('Team 1');
+          expect(team.archived).to.be.false;
+        }).then(done, done);
+      });
+
+      it('be DESC', function(done) {
+        Team.query().orderBy('-custom').first().then(function(team) {
+          expect(team.name).to.eql('Team 5');
+          expect(team.archived).to.be.true;
+        }).then(done, done);
+      });
+    });
   });
 
   describe('after', function() {
@@ -279,6 +301,23 @@ describe('Query',function() {
           expect(archiveds).to.eql([false, true, false]);
         }).then(done, done);
       });
+    });
+  });
+
+  describe('afterId', function() {
+    it('should return the 1st 2 teams', function(done) {
+      Team.query().afterId('name').limit(2).then(function(result) {
+        var names = _.pluck(result, 'name');
+        expect(names).to.eql(['Team 1', 'Team 2']);
+      }).then(done, done);
+    });
+
+    it('should return 2 teams after', function(done) {
+      var team = teams[2];
+      Team.query().afterId('name', team.id).limit(2).then(function(result) {
+        var names = _.pluck(result, 'name');
+        expect(names).to.eql(['Team 4', 'Team 5']);
+      }).then(done, done);
     });
   });
 });
