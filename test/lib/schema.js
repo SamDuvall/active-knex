@@ -48,60 +48,60 @@ describe('Schema',function() {
   });
 
   describe('findById', function() {
-    it('should find a record by ID', function(done) {
-      Team.findById(team.id).then(function(result) {
+    it('should find a record by ID', function() {
+      return Team.findById(team.id).then(function(result) {
         expect(result.id).to.eql(team.id);
-      }).then(done, done);
+      });
     });
 
-    it('should find a record by a ID (custom primaryKey)', function(done) {
-      Team.Bus.findById(team.id).then(function(result) {
+    it('should find a record by a ID (custom primaryKey)', function() {
+      return Team.Bus.findById(team.id).then(function(result) {
         expect(result.teamId).to.eql(team.id);
-      }).then(done, done);
+      });
     });
   });
 
   describe('removeById', function() {
-    it('should remove a record by ID', function(done) {
-      Team.removeById(team2.id).then(function() {
+    it('should remove a record by ID', function() {
+      return Team.removeById(team2.id).then(function() {
         return Team.query();
       }).then(function(teams) {
         var ids = _.pluck(teams, 'id');
         expect(ids).to.eql([1]);
-      }).then(done, done);
+      });
     });
 
-    it('should remove a record by ID (custom primaryKey)', function(done) {
-      Team.Bus.removeById(team.id).then(function() {
+    it('should remove a record by ID (custom primaryKey)', function() {
+      return Team.Bus.removeById(team.id).then(function() {
         return Team.Bus.query();
       }).then(function(buses) {
         expect(buses).to.be.empty;
-      }).then(done, done);
+      });
     });
   });
 
   describe('create', function() {
     describe('no transaction', function() {
-      it('should create no records', function(done) {
-        Team.create([]).then(function(teams) {
+      it('should create no records', function() {
+        return Team.create([]).then(function(teams) {
           expect(teams).to.be.empty;
-        }).then(done, done);
+        });
       });
 
-      it('should create a single record', function(done) {
-        Team.create({name: 'Team Name'}).then(function(team) {
+      it('should create a single record', function() {
+        return Team.create({name: 'Team Name'}).then(function(team) {
           expect(team.id).to.not.be.undefined;
           expect(team.name).to.eql('Team Name');
-        }).then(done, done);
+        });
       });
 
-      it('should create multiple records', function(done) {
-        Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}]).then(function(teams) {
+      it('should create multiple records', function() {
+        return Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}]).then(function(teams) {
           var first = _.first(teams);
           var last = _.last(teams);
           expect(teams).to.have.length(3);
           expect(last.id - first.id).to.eql(2);
-        }).then(done, done);
+        });
       });
 
       it('should create a lot of records (in bulk)', function() {
@@ -123,8 +123,8 @@ describe('Schema',function() {
     });
 
     describe('commit transaction', function() {
-      it('should create a single record', function(done) {
-        knex.transaction(function(trx) {
+      it('should create a single record', function() {
+        return knex.transaction(function(trx) {
           return Team.create({name: 'Team Name'}, trx).then(function(team) {
             expect(team.id).to.not.be.undefined;
             expect(team.name).to.eql('Team Name');
@@ -133,11 +133,11 @@ describe('Schema',function() {
           return Team.findByName('Team Name');
         }).then(function(team) {
           expect(team).to.not.be.undefined;
-        }).then(done, done);
+        });
       });
 
-      it('should create multiple records', function(done) {
-        knex.transaction(function(trx) {
+      it('should create multiple records', function() {
+        return knex.transaction(function(trx) {
           return Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}], trx).then(function(teams) {
             var first = _.first(teams);
             var last = _.last(teams);
@@ -148,7 +148,7 @@ describe('Schema',function() {
           return Team.query();
         }).then(function(teams) {
           expect(teams).to.have.length(5);
-        }).then(done, done);
+        });
       });
 
       it('should create a lot of records (in bulk)', function() {
@@ -172,8 +172,8 @@ describe('Schema',function() {
     });
 
     describe('rollback transaction', function() {
-      it('should NOT create a single record', function(done) {
-        knex.transaction(function(trx) {
+      it('should NOT create a single record', function() {
+        return knex.transaction(function(trx) {
           return Team.create({name: 'Team Name'}, trx).then(function(team) {
             expect(team.id).to.not.be.undefined;
             expect(team.name).to.eql('Team Name');
@@ -183,11 +183,11 @@ describe('Schema',function() {
           return Team.findByName('Team Name');
         }).then(function(team) {
           expect(team).to.be.undefined;
-        }).then(done, done);
+        });
       });
 
-      it('should NOT create multiple records', function(done) {
-        knex.transaction(function(trx) {
+      it('should NOT create multiple records', function() {
+        return knex.transaction(function(trx) {
           return Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}], trx).then(function(teams) {
             var first = _.first(teams);
             var last = _.last(teams);
@@ -199,33 +199,33 @@ describe('Schema',function() {
           return Team.query();
         }).then(function(teams) {
           expect(teams).to.have.length(2);
-        }).then(done, done);
+        });
       });
     });
   });
 
   describe('update', function() {
     describe('no transaction', function() {
-      it('should update a record', function(done) {
-        Team.update(team, {archived: true}).then(function(result) {
+      it('should update a record', function() {
+        return Team.update(team, {archived: true}).then(function(result) {
           return Team.findById(team.id);
         }).then(function(team) {
           expect(team.archived).to.be.true;
-        }).then(done, done);
+        });
       });
 
-      it('should create a record (custom primaryKey)', function(done) {
-        Team.Bus.update(teamBus, {driver: 'New Driver'}).then(function(result) {
+      it('should create a record (custom primaryKey)', function() {
+        return Team.Bus.update(teamBus, {driver: 'New Driver'}).then(function(result) {
           return Team.Bus.findById(teamBus.teamId);
         }).then(function(teamBus) {
           expect(teamBus.driver).to.equal('New Driver');
-        }).then(done, done);
+        });
       });
     });
 
     describe('commit transaction', function() {
-      it('should update a record', function(done) {
-        knex.transaction(function(trx) {
+      it('should update a record', function() {
+        return knex.transaction(function(trx) {
           return Team.update(team, {name: 'New Name'}, trx).then(function(team) {
             expect(team.name).to.eql('New Name');
           }).then(trx.commit);
@@ -233,13 +233,13 @@ describe('Schema',function() {
           return Team.findByName('New Name');
         }).then(function(team) {
           expect(team).to.not.be.undefined;
-        }).then(done, done);
+        });
       });
     });
 
     describe('rollback transaction', function() {
-      it('should NOT update a record', function(done) {
-        knex.transaction(function(trx) {
+      it('should NOT update a record', function() {
+        return knex.transaction(function(trx) {
           return Team.update(team, {name: 'New Name'}, trx).then(function(team) {
             expect(team.name).to.eql('New Name');
           }).then(trx.rollback);
@@ -247,37 +247,37 @@ describe('Schema',function() {
           return Team.findByName('New Name');
         }).then(function(team) {
           expect(team).to.be.undefined;
-        }).then(done, done);
+        });
       });
     });
   });
 
   describe('findOrCreate', function() {
     describe('no transaction', function() {
-      it('should find a record', function(done) {
-        Team.findOrCreate({name: team.name}).then(function(result) {
+      it('should find a record', function() {
+        return Team.findOrCreate({name: team.name}).then(function(result) {
           expect(result.id).to.eql(team.id);
-        }).then(done, done);
+        });
       });
 
-      it('should create a record', function(done) {
-        Team.findOrCreate({name: 'New Name'}).then(function(result) {
+      it('should create a record', function() {
+        return Team.findOrCreate({name: 'New Name'}).then(function(result) {
           expect(result.id).to.not.eql(team.id);
-        }).then(done, done);
+        });
       });
     });
 
     describe('commit transaction', function() {
-      it('should find a record', function(done) {
-        knex.transaction(function(trx) {
+      it('should find a record', function() {
+        return knex.transaction(function(trx) {
           return Team.findOrCreate({name: team.name}, trx).then(function(result) {
             expect(result.id).to.eql(team.id);
           }).then(trx.commit);
-        }).then(done, done);
+        });
       });
 
-      it('should create a record', function(done) {
-        knex.transaction(function(trx) {
+      it('should create a record', function() {
+        return knex.transaction(function(trx) {
           return Team.findOrCreate({name: 'Team Name'}, trx).then(function(result) {
             expect(result.id).to.not.eql(team.id);
           }).then(trx.commit);
@@ -285,13 +285,13 @@ describe('Schema',function() {
           return Team.findByName('Team Name');
         }).then(function(team) {
           expect(team).to.not.be.undefined;
-        }).then(done, done);
+        });
       });
     });
 
     describe('rollback transaction', function() {
-      it('should NOT create a record', function(done) {
-        knex.transaction(function(trx) {
+      it('should NOT create a record', function() {
+        return knex.transaction(function(trx) {
           return Team.findOrCreate({name: 'Team Name'}, trx).then(function(result) {
             expect(result.id).to.not.eql(team.id);
           }).then(trx.rollback);
@@ -300,65 +300,65 @@ describe('Schema',function() {
           return Team.findByName('Team Name');
         }).then(function(team) {
           expect(team).to.be.undefined;
-        }).then(done, done);
+        });
       });
     });
   });
 
   describe('updateOrCreate', function() {
-    it('should update a record', function(done) {
-      Team.updateOrCreate({name: team.name, archived: true}).then(function(result) {
+    it('should update a record', function() {
+      return Team.updateOrCreate({name: team.name, archived: true}).then(function(result) {
         expect(result.id).to.eql(team.id);
         expect(result.archived).to.be.true;
-      }).then(done, done);
+      });
     });
 
-    it('should create a record', function(done) {
-      Team.updateOrCreate({name: 'New Name', archived: true}).then(function(result) {
+    it('should create a record', function() {
+      return Team.updateOrCreate({name: 'New Name', archived: true}).then(function(result) {
         expect(result.id).to.not.eql(team.id);
         expect(result.archived).to.be.true;
-      }).then(done, done);
+      });
     });
   });
 
   describe('query', function() {
-    it('should create a custom query in the query builder', function(done) {
-      Team.query().whereName(team.name).first().then(function(team) {
+    it('should create a custom query in the query builder', function() {
+      return Team.query().whereName(team.name).first().then(function(team) {
         expect(team.id).to.eql(team.id);
-      }).then(done, done);
+      });
     });
   });
 
   describe('joins', function() {
-    it('should only join once', function(done) {
-      Player.query().joins('teams', 'teams').where('teams.id', team.id).then(function(result) {
+    it('should only join once', function() {
+      return Player.query().joins('teams', 'teams').where('teams.id', team.id).then(function(result) {
         expect(result).to.have.length(2);
-      }).then(done, done);
+      });
     });
 
-    it('should query over a join', function(done) {
-      Player.query().whereTeamId(team.id).then(function(result) {
+    it('should query over a join', function() {
+      return Player.query().whereTeamId(team.id).then(function(result) {
         expect(result).to.have.length(2);
-      }).then(done, done);
+      });
     });
   });
 
   describe('load', function() {
-    it('should load belongsTo', function(done) {
-      Player.load(player, 'team').then(function(player) {
+    it('should load belongsTo', function() {
+      return Player.load(player, 'team').then(function(player) {
         expect(player.team.id).to.eql(team.id)
-      }).then(done, done);
+      });
     });
 
-    it('should load hasMany', function(done) {
-      Team.load(team, 'players').then(function(team) {
+    it('should load hasMany', function() {
+      return Team.load(team, 'players').then(function(team) {
         expect(team.players).to.have.length(2);
-      }).then(done, done);
+      });
     });
   });
 
   describe('events', function() {
-    it('should trigger create events', function(done) {
+    it('should trigger create events', function() {
       var beforeCount = 0;
       Player.before('create', function() {
         beforeCount += 1;
@@ -369,14 +369,14 @@ describe('Schema',function() {
         afterCount += 1;
       });
 
-      Player.create({teamId: team.id, email: 'A@A.COM', name: 'New Name'}).then(function(player) {
+      return Player.create({teamId: team.id, email: 'A@A.COM', name: 'New Name'}).then(function(player) {
         expect(player.email).to.eql('a@a.com');
         expect(beforeCount).to.eql(1);
         expect(afterCount).to.eql(1);
-      }).then(done, done);
+      });
     });
 
-    it('should trigger update events', function(done) {
+    it('should trigger update events', function() {
       var beforeCount = 0;
       Player.before('update', function() {
         beforeCount += 1;
@@ -387,11 +387,11 @@ describe('Schema',function() {
         afterCount += 1;
       });
 
-      Player.update(team, {email: 'A@A.COM', name: 'New Name'}).then(function(player) {
+      return Player.update(team, {email: 'A@A.COM', name: 'New Name'}).then(function(player) {
         expect(player.email).to.eql('a@a.com');
         expect(beforeCount).to.eql(1);
         expect(afterCount).to.eql(1);
-      }).then(done, done);
+      });
     });
   });
 });
