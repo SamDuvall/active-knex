@@ -103,6 +103,23 @@ describe('Schema',function() {
           expect(last.id - first.id).to.eql(2);
         }).then(done, done);
       });
+
+      it('should create a lot of records (in bulk)', function() {
+        this.timeout(30000);
+
+        var records = _.times(10000, function(index) {
+          return { name: 'Bulk #' + (index + 1) };
+        });
+
+        return Team.create(records).then(function(teams) {
+          expect(teams.length).to.eql(records.length);
+          _.each(records, function(record, index) {
+            var team = teams[index];
+            expect(team.id).not.to.be.undefined;
+            expect(team.name).to.eql(record.name);
+          });
+        });
+      });
     });
 
     describe('commit transaction', function() {
@@ -132,6 +149,25 @@ describe('Schema',function() {
         }).then(function(teams) {
           expect(teams).to.have.length(5);
         }).then(done, done);
+      });
+
+      it('should create a lot of records (in bulk)', function() {
+        this.timeout(30000);
+
+        var records = _.times(10000, function(index) {
+          return { name: 'Bulk #' + (index + 1) };
+        });
+
+        return knex.transaction(function(trx) {
+          return Team.create(records, trx).then(function(teams) {
+            expect(teams.length).to.eql(records.length);
+            _.each(records, function(record, index) {
+              var team = teams[index];
+              expect(team.id).not.to.be.undefined;
+              expect(team.name).to.eql(record.name);
+            });
+          });
+        });
       });
     });
 

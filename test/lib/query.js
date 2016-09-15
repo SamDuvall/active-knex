@@ -289,7 +289,7 @@ describe('Query',function() {
         }).then(done, done);
       });
 
-      it('should return the 2nd 3 teams tacos', function(done) {
+      it('should return the 2nd 3 teams', function(done) {
         Team.query().after(columns).limit(3).then(function(result) {
           var last = _.last(result);
           var lastValues = [last.name, last.archived];
