@@ -1,6 +1,6 @@
 {
   "name": "active-knex",
-  "version": "0.5.2",
+  "version": "0.6.5",
   "dependencies": {
     "bluebird": {
       "version": "3.4.1",
