@@ -306,6 +306,12 @@ describe('Schema',function() {
   });
 
   describe('updateOrCreate', function() {
+    it('should find a record', function() {
+      return Team.updateOrCreate({name: team.name}).then(function(result) {
+        expect(result.id).to.eql(team.id);
+      });
+    });
+
     it('should update a record', function() {
       return Team.updateOrCreate({name: team.name, archived: true}).then(function(result) {
         expect(result.id).to.eql(team.id);
