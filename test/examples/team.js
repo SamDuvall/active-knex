@@ -8,6 +8,7 @@ var Team = ActiveKnex.Schema.create(knex, {
 
   fields: {
     archived: { type: 'boolean', default: false },
+    tags: { type: 'csv' },
     createdAt: true,
     updatedAt: true
   },

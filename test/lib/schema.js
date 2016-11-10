@@ -12,7 +12,7 @@ describe('Schema',function() {
   var player;
   var player2;
   beforeEachSync(function() {
-    team = Factory.create('team');
+    team = Factory.create('team', {tags: ['alpha', 'beta']});
     team2 = Factory.create('team', {archived: true});
 
     teamBus = Factory.create('team.bus', {teamId: team.id})
@@ -207,14 +207,15 @@ describe('Schema',function() {
   describe('update', function() {
     describe('no transaction', function() {
       it('should update a record', function() {
-        return Team.update(team, {archived: true}).then(function(result) {
+        return Team.update(team, {archived: true, tags: null}).then(function(result) {
           return Team.findById(team.id);
         }).then(function(team) {
           expect(team.archived).to.be.true;
+          expect(team.tags).to.be.null;
         });
       });
 
-      it('should create a record (custom primaryKey)', function() {
+      it('should update a record (custom primaryKey)', function() {
         return Team.Bus.update(teamBus, {driver: 'New Driver'}).then(function(result) {
           return Team.Bus.findById(teamBus.teamId);
         }).then(function(teamBus) {
