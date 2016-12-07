@@ -350,6 +350,18 @@ describe('Schema',function() {
     });
   });
 
+  describe('reload', function() {
+    it('should reload attributes onto the object', function() {
+      var name = player.name;
+      player.name = 'other name';
+      player.extra = 'something';
+      return Player.reload(player).then(function() {
+        expect(player.name).to.eql(name);
+        expect(player.extra).to.eql('something');
+      });
+    });
+  });
+
   describe('load', function() {
     it('should load belongsTo', function() {
       return Player.load(player, 'team').then(function(player) {
