@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var Promise = require('bluebird');
 var expect = require('chai').expect;
 var Factory = require('../factory');
 var Player = require('../examples/player');
@@ -199,6 +200,35 @@ describe('Schema',function() {
           return Team.query();
         }).then(function(teams) {
           expect(teams).to.have.length(2);
+        });
+      });
+    });
+  });
+
+  describe('batchCreate', function() {
+    describe('commit transaction', function() {
+      it('should create multiple records', function() {
+        return knex.transaction(function(trx) {
+          return Promise.map([{name: 'Team One'}, {name: 'Team Two'}], function(params) {
+            return Team.batchCreate(params, trx);
+          }).then(trx.commit);
+        }).then(function(teams) {
+          var names = _.pluck(teams, 'name');
+          expect(names).to.eql(['Team One', 'Team Two']);
+        });
+      });
+    });
+
+    describe('rollback transaction', function() {
+      it('should NOT create multiple records', function() {
+        return knex.transaction(function(trx) {
+          return Promise.map([{name: 'Team One'}, {name: 'Team Two'}], function(params) {
+            return Team.batchCreate(params, trx);
+          }).then(trx.rollback);
+        }).catch(function() {
+          return Team.findByName('Team One');
+        }).then(function(team) {
+          expect(team).to.be.undefined;
         });
       });
     });
