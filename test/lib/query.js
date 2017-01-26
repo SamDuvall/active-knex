@@ -4,17 +4,25 @@ var camelize = require('../../lib/query/camelize');
 var Factory = require('../factory');
 var Player = require('../examples/player');
 var Team = require('../examples/team');
+var knex = require('../knex');
 
 describe('Query',function() {
   var teams;
   var players;
   beforeEachSync(function() {
     teams = _.times(5, function(index) {
-      return Factory.create('team', {name: 'Team ' + (index + 1)});
+      return Factory.create('team', {
+        name: 'Team ' + (index + 1)
+      });
     });
 
     players = _.map(teams, function(team) {
-      return Factory.create('player', {teamId: team.id});
+      return Factory.create('player', {
+        teamId: team.id,
+        stats: {
+          positions: ['1B', 'SS', '3B']
+        }
+      });
     });
   });
 
@@ -318,6 +326,19 @@ describe('Query',function() {
         var names = _.pluck(result, 'name');
         expect(names).to.eql(['Team 4', 'Team 5']);
       })
+    });
+  });
+
+  describe('update', function() {
+    it('should update using raw values', function() {
+      var player = _.first(players);
+      return Player.query().where('id', player.id).update({
+        stats: knex.raw('JSON_REMOVE(stats, ?)', '$.positions[1]')
+      }).then(function() {
+        return Player.findById(player.id);
+      }).then(function(result) {
+        expect(result.stats.positions).to.eql(['1B','3B']);
+      });
     });
   });
 });
