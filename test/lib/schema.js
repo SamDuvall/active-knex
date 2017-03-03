@@ -105,7 +105,7 @@ describe('Schema',function() {
         });
       });
 
-      it('should create a lot of records (in bulk) tacos', function() {
+      it('should create a lot of records (in bulk)', function() {
         this.timeout(30000);
 
         var records = _.times(10000, function(index) {
@@ -236,7 +236,7 @@ describe('Schema',function() {
 
   describe('update', function() {
     describe('no transaction', function() {
-      it('should update a record', function() {
+      it('should update a record (multiple)', function() {
         return Team.update(team, {archived: true, tags: null}).then(function(result) {
           return Team.findById(team.id);
         }).then(function(team) {

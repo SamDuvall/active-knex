@@ -293,7 +293,25 @@ describe('Query',function() {
   });
 
   describe('update', function() {
-    it('should update using raw values', function() {
+    it('should update a record (single)', function() {
+      var team = _.first(teams);
+      return Team.where('id', team.id).update('tags', ['chicago', 'dc']).then(function(result) {
+        return Team.findById(team.id);
+      }).then(function(team) {
+        expect(team.tags).to.eql(['chicago', 'dc']);
+      });
+    });
+
+    it('should update a record (multiple)', function() {
+      var team = _.first(teams);
+      return Team.where('id', team.id).update({tags: ['chicago', 'dc']}).then(function(result) {
+        return Team.findById(team.id);
+      }).then(function(team) {
+        expect(team.tags).to.eql(['chicago', 'dc']);
+      });
+    });
+
+    it('should update using raw values (multiple)', function() {
       var player = _.first(players);
       return Player.query().where('id', player.id).update({
         stats: knex.raw('JSON_REMOVE(stats, ?)', '$.positions[1]')
@@ -303,5 +321,24 @@ describe('Query',function() {
         expect(result.stats.positions).to.eql(['1B','3B']);
       });
     });
-  });
+
+    it('should update using raw values (single)', function() {
+      var player = _.first(players);
+      return Player.query().where('id', player.id).update('stats', knex.raw('JSON_REMOVE(stats, ?)', '$.positions[1]')).then(function() {
+        return Player.findById(player.id);
+      }).then(function(result) {
+        expect(result.stats.positions).to.eql(['1B','3B']);
+      });
+    });
+
+    it('should update using raw values (multiple)', function() {
+      var player = _.first(players);
+      return Player.query().where('id', player.id).update({
+        stats: knex.raw('JSON_REMOVE(stats, ?)', '$.positions[1]')
+      }).then(function() {
+        return Player.findById(player.id);
+      }).then(function(result) {
+        expect(result.stats.positions).to.eql(['1B','3B']);
+      });
+    });  });
 });
