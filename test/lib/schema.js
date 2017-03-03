@@ -405,42 +405,4 @@ describe('Schema',function() {
       });
     });
   });
-
-  describe('events', function() {
-    it('should trigger create events', function() {
-      var beforeCount = 0;
-      Player.before('create', function() {
-        beforeCount += 1;
-      });
-
-      var afterCount = 0;
-      Player.after('create', function() {
-        afterCount += 1;
-      });
-
-      return Player.create({teamId: team.id, email: 'A@A.COM', name: 'New Name'}).then(function(player) {
-        expect(player.email).to.eql('a@a.com');
-        expect(beforeCount).to.eql(1);
-        expect(afterCount).to.eql(1);
-      });
-    });
-
-    it('should trigger update events', function() {
-      var beforeCount = 0;
-      Player.before('update', function() {
-        beforeCount += 1;
-      });
-
-      var afterCount = 0;
-      Player.after('update', function() {
-        afterCount += 1;
-      });
-
-      return Player.update(team, {email: 'A@A.COM', name: 'New Name'}).then(function(player) {
-        expect(player.email).to.eql('a@a.com');
-        expect(beforeCount).to.eql(1);
-        expect(afterCount).to.eql(1);
-      });
-    });
-  });
 });
