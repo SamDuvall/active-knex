@@ -27,43 +27,6 @@ describe('Query',function() {
   });
 
   describe('camelize', function() {
-    describe('toSnakeCase', function() {
-      var examples = [{
-        before: 'select * from `tableName` order by `teamId` asc limit ?',
-        after:  'select * from `table_name` order by `team_id` asc limit ?'
-      }, {
-        before: 'insert into `tableName` (`createdAt`, `name`, `teamId`, `s3Key`, `updatedAt`) values (?, ?, ?, ?)',
-        after:  'insert into `table_name` (`created_at`, `name`, `team_id`, `s3_key`, `updated_at`) values (?, ?, ?, ?)'
-      }, {
-        before: 'update `tableName` set `email` = ?, `name` = ?, `updatedAt` = ? where `id` = ?',
-        after:  'update `table_name` set `email` = ?, `name` = ?, `updated_at` = ? where `id` = ?'
-      }];
-
-      it('should convert an SQL string from snake_case to lowerCamelCase', function() {
-        _.each(examples, function(example) {
-          var result = camelize.toSnakeCase(example.before);
-          expect(result).to.eql(example.after);
-        })
-      });
-    });
-
-    describe('toLowerCamelCase', function() {
-      var examples = [{
-        before: {name: 'test', s3_key: 'test', team_id: 'test'},
-        after: {name: 'test', s3Key: 'test', teamId: 'test'}
-      }, {
-        before: [{name: 'test', s3_key: 'test', team_id: 'test'}],
-        after: [{name: 'test', s3Key: 'test', teamId: 'test'}]
-      }];
-
-      it('should convert an SQL response from lowerCamelCase to snake_case', function() {
-        _.each(examples, function(example) {
-          var result = camelize.toLowerCamelCase(example.before);
-          expect(result).to.eql(example.after);
-        })
-      });
-    });
-
     it('should convert to snake_case and back', function() {
       var teamIds = _.pluck(players, 'teamId');
       return Player.query().whereIn('teamId', teamIds).then(function(players) {

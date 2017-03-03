@@ -105,7 +105,7 @@ describe('Schema',function() {
         });
       });
 
-      it('should create a lot of records (in bulk)', function() {
+      it('should create a lot of records (in bulk) tacos', function() {
         this.timeout(30000);
 
         var records = _.times(10000, function(index) {
@@ -205,12 +205,12 @@ describe('Schema',function() {
     });
   });
 
-  describe('batchCreate', function() {
+  describe('bufferCreate', function() {
     describe('commit transaction', function() {
       it('should create multiple records', function() {
         return knex.transaction(function(trx) {
           return Promise.map([{name: 'Team One'}, {name: 'Team Two'}], function(params) {
-            return Team.batchCreate(params, trx);
+            return Team.bufferCreate(params, trx);
           }).then(trx.commit);
         }).then(function(teams) {
           var names = _.pluck(teams, 'name');
@@ -223,7 +223,7 @@ describe('Schema',function() {
       it('should NOT create multiple records', function() {
         return knex.transaction(function(trx) {
           return Promise.map([{name: 'Team One'}, {name: 'Team Two'}], function(params) {
-            return Team.batchCreate(params, trx);
+            return Team.bufferCreate(params, trx);
           }).then(trx.rollback);
         }).catch(function() {
           return Team.findByName('Team One');
