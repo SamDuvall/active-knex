@@ -24,8 +24,8 @@ describe('util',function() {
     });
   });
 
-  describe('toSnakeCase', function() {
-    var toSnakeCase = ActiveKnex.util.toSnakeCase;
+  describe('toSqlSnakeCase', function() {
+    var toSqlSnakeCase = ActiveKnex.util.toSqlSnakeCase;
 
     var examples = [{
       before: 'select * from `tableName` order by `teamId` asc limit ?',
@@ -36,11 +36,14 @@ describe('util',function() {
     }, {
       before: 'update `tableName` set `email` = ?, `name` = ?, `updatedAt` = ? where `id` = ?',
       after:  'update `table_name` set `email` = ?, `name` = ?, `updated_at` = ? where `id` = ?'
+    }, {
+      before: 'SELECT id, JSON_EXTRACT(handbooks.prevBranding, "$.handbookCss") FROM handbooks WHERE JSON_EXTRACT(handbooks.prevBranding, "$.handbookCss") IS NOT NULL',
+      after: 'SELECT id, JSON_EXTRACT(handbooks.prev_branding, "$.handbookCss") FROM handbooks WHERE JSON_EXTRACT(handbooks.prev_branding, "$.handbookCss") IS NOT NULL'
     }];
 
-    it('should convert an SQL string from snake_case to lowerCamelCase', function() {
+    it('should convert an SQL string to snake_case from lowerCamelCase', function() {
       _.each(examples, function(example) {
-        var result = toSnakeCase(example.before);
+        var result = toSqlSnakeCase(example.before);
         expect(result).to.eql(example.after);
       })
     });
@@ -57,7 +60,7 @@ describe('util',function() {
       after: [{name: 'test', s3Key: 'test', teamId: 'test'}]
     }];
 
-    it('should convert an SQL response from lowerCamelCase to snake_case', function() {
+    it('should convert an SQL response to lowerCamelCase from snake_case', function() {
       _.each(examples, function(example) {
         var result = toLowerCamelCase(example.before);
         expect(result).to.eql(example.after);
