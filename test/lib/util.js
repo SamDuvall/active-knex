@@ -3,10 +3,10 @@ var _ = require('underscore');
 var expect = require('chai').expect;
 var ActiveKnex = require('../../index');
 
-describe('util',function() {
-  describe('arrayify',function() {
+describe('util', () => {
+  describe('arrayify', () => {
     var arrayify = ActiveKnex.util.arrayify;
-    it('convert everything to an array', function() {
+    it('convert everything to an array', () => {
       // Empty
       expect(arrayify()).to.eql([]);
       expect(arrayify(undefined)).to.eql([]);
@@ -24,7 +24,7 @@ describe('util',function() {
     });
   });
 
-  describe('toSqlSnakeCase', function() {
+  describe('toSqlSnakeCase', () => {
     var toSqlSnakeCase = ActiveKnex.util.toSqlSnakeCase;
 
     var examples = [{
@@ -41,7 +41,7 @@ describe('util',function() {
       after: 'SELECT id, JSON_EXTRACT(handbooks.prev_branding, "$.handbookCss") FROM handbooks WHERE JSON_EXTRACT(handbooks.prev_branding, "$.handbookCss") IS NOT NULL'
     }];
 
-    it('should convert an SQL string to snake_case from lowerCamelCase', function() {
+    it('should convert an SQL string to snake_case from lowerCamelCase', () => {
       _.each(examples, function(example) {
         var result = toSqlSnakeCase(example.before);
         expect(result).to.eql(example.after);
@@ -49,7 +49,7 @@ describe('util',function() {
     });
   });
 
-  describe('toLowerCamelCase', function() {
+  describe('toLowerCamelCase', () => {
     var toLowerCamelCase = ActiveKnex.util.toLowerCamelCase;
 
     var examples = [{
@@ -60,7 +60,7 @@ describe('util',function() {
       after: [{name: 'test', s3Key: 'test', teamId: 'test'}]
     }];
 
-    it('should convert an SQL response to lowerCamelCase from snake_case', function() {
+    it('should convert an SQL response to lowerCamelCase from snake_case', () => {
       _.each(examples, function(example) {
         var result = toLowerCamelCase(example.before);
         expect(result).to.eql(example.after);

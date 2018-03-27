@@ -1,7 +1,7 @@
 {
   "name": "active-knex",
   "description": "Adding ActiveRecord-esque functionality to knex",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "license": "MIT",
   "author": "Sam Duvall <https://github.com/SamDuvall>",
   "keywords": [
@@ -11,24 +11,24 @@
   ],
   "main": "index.js",
   "engines": {
-    "node": ">=4.8"
+    "node": ">=8"
   },
   "repository": {
     "type": "git",
     "url": "git@github.com:SamDuvall/active-knex.git"
   },
   "dependencies": {
-    "bluebird": "^3.4.0",
-    "knex": "SamDuvall/knex#schema",
-    "mysql": "^2.11.0",
-    "underscore": "^1.8.0",
-    "underscore.string": "^3.0.1"
+    "bluebird": "^3.5.1",
+    "knex": "SamDuvall/knex#schema-0.14.4",
+    "lodash": "^4.17.5",
+    "mysql": "^2.15.0",
+    "underscore": "^1.8.3",
+    "underscore.string": "^3.3.4"
   },
   "devDependencies": {
-    "chai": "^1.10.0",
-    "fibers": "^1.0.5",
-    "mocha": "^3.0.2",
-    "rosie": "^0.3.1"
+    "chai": "^4.1.2",
+    "mocha": "^5.0.5",
+    "rosie": "^1.6.0"
   },
   "scripts": {
     "build": "bash node_modules/knex/scripts/build.sh",

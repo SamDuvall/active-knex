@@ -24,7 +24,7 @@ var Player = ActiveKnex.Schema.create(knex, {
   },
 
   relations: {
-    team: function() {
+    team: () => {
       var Team = require('./team');
       return ActiveKnex.Relation.BelongsTo({
         model: Team,
