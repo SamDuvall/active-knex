@@ -1,31 +1,30 @@
-require('./database');
-var _ = require('underscore');
-var Factory = require('rosie').Factory;
-var Player = require('./examples/player');
-var Team = require('./examples/team');
+const isArray = require('lodash/isArray')
+const {Factory} = require('rosie')
+const Player = require('./examples/player')
+const Team = require('./examples/team')
+require('./database')
 
-// Override define
-Factory.define = function(name, schema) {
-  var factory = new Factory;
-  factory.schema = schema;
-  this.factories[name] = factory;
-  return factory;
-};
+Factory.define = function (name, schema) {
+  var factory = new Factory()
+  factory.schema = schema
+  this.factories[name] = factory
+  return factory
+}
 
-// Blocking create function
-Factory.create = function(name, attributes, options) {
-  var data = this.build.apply(this, arguments);
-  var factory = this.factories[name];
-  return waitFor(factory.schema.create(data));
+Factory.create = async function (name, params) {
+  const build = (attr) => this.build(name, attr)
+  const attr = isArray(params) ? params.map(build) : build(params)
+  const factory = this.factories[name]
+  return factory.schema.create(attr)
 }
 
 Factory.define('player', Player)
-  .sequence('name', function(i) { return 'Player #' + i})
+  .sequence('name', (i) => 'Player #' + i)
 
 Factory.define('team', Team)
-  .sequence('name', function(i) { return 'Team #' + i})
+  .sequence('name', (i) => 'Team #' + i)
 
 Factory.define('team.bus', Team.Bus)
-  .sequence('driver', function(i) { return 'Bus Driver #' + i})
+  .sequence('driver', (i) => 'Bus Driver #' + i)
 
-module.exports = Factory;
+module.exports = Factory
