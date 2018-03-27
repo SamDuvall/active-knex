@@ -4,9 +4,8 @@ const Player = require('./examples/player')
 const Team = require('./examples/team')
 require('./database')
 
-// Override define
-Factory.define = function(name, schema) {
-  var factory = new Factory
+Factory.define = function (name, schema) {
+  var factory = new Factory()
   factory.schema = schema
   this.factories[name] = factory
   return factory
@@ -16,7 +15,7 @@ Factory.create = async function (name, params) {
   const build = (attr) => this.build(name, attr)
   const attr = isArray(params) ? params.map(build) : build(params)
   const factory = this.factories[name]
-  return await factory.schema.create(attr)
+  return factory.schema.create(attr)
 }
 
 Factory.define('player', Player)

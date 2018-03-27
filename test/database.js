@@ -1,7 +1,8 @@
+/* global after before beforeEach */
 const flatMap = require('lodash/flatMap')
 const values = require('lodash/values')
-const Promise = require('bluebird');
-const knex = require('./knex');
+const Promise = require('bluebird')
+const knex = require('./knex')
 
 // Tables
 let tablesCache
@@ -17,8 +18,8 @@ const loadSchema = () => knex.schemaLoader.reset()
 const cleanDatabase = () => truncateTables(tablesCache)
 
 // Create the database
-before(async function() {
-  this.timeout(5000);
+before(async function () {
+  this.timeout(5000)
   await loadSchema()
   tablesCache = await getTables()
 })
@@ -29,7 +30,7 @@ const hasClean = (ctx) => {
   return isClean(ctx) || (parent && hasClean(parent))
 }
 
-beforeEach(function() {
+beforeEach(function () {
   const clean = hasClean(this.currentTest)
   if (clean) return cleanDatabase()
 })

@@ -1,6 +1,5 @@
-var _ = require('underscore');
-var ActiveKnex = require('../../index');
-var knex = require('../knex');
+const ActiveKnex = require('../../index')
+const knex = require('../knex')
 
 var Player = ActiveKnex.Schema.create(knex, {
   tableName: 'players',
@@ -12,26 +11,26 @@ var Player = ActiveKnex.Schema.create(knex, {
   },
 
   joins: {
-    teams: function(qb) {
-      return qb.leftJoin('teams', 'players.team_id', 'teams.id');
+    teams: function (qb) {
+      return qb.leftJoin('teams', 'players.team_id', 'teams.id')
     }
   },
 
   queries: {
-    whereTeamId: function(id) {
-      return this.joins('teams').where('teams.id', id);
+    whereTeamId: function (id) {
+      return this.joins('teams').where('teams.id', id)
     }
   },
 
   relations: {
     team: () => {
-      var Team = require('./team');
+      var Team = require('./team')
       return ActiveKnex.Relation.BelongsTo({
         model: Team,
         foreignKey: 'team_id'
-      });
+      })
     }
   }
-});
+})
 
-module.exports = Player;
+module.exports = Player
