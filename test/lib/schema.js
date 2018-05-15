@@ -205,35 +205,6 @@ describe('Schema', () => {
     })
   })
 
-  describe('bufferCreate', () => {
-    describe('commit transaction', () => {
-      it('should create multiple records', () => {
-        return knex.transaction(function (trx) {
-          return Promise.map([{name: 'Team One'}, {name: 'Team Two'}], function (params) {
-            return Team.bufferCreate(params, trx)
-          }).then(trx.commit)
-        }).then(function (teams) {
-          var names = _.pluck(teams, 'name')
-          expect(names).to.eql(['Team One', 'Team Two'])
-        })
-      })
-    })
-
-    describe('rollback transaction @cleandb', () => {
-      it('should NOT create multiple records', () => {
-        return knex.transaction(function (trx) {
-          return Promise.map([{name: 'Team One'}, {name: 'Team Two'}], function (params) {
-            return Team.bufferCreate(params, trx)
-          }).then(trx.rollback)
-        }).catch(() => {
-          return Team.findByName('Team One')
-        }).then(function (team) {
-          expect(team).to.be.undefined
-        })
-      })
-    })
-  })
-
   describe('update', () => {
     describe('no transaction', () => {
       it('should update a record (multiple)', () => {
