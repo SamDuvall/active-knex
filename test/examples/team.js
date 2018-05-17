@@ -32,11 +32,6 @@ var Team = ActiveKnex.Schema.create(knex, {
         foreignKey: 'team_id'
       })
     }
-  },
-
-  orders: {
-    'custom': ['archived', 'name'],
-    '-custom': ['-archived', '-name']
   }
 })
 

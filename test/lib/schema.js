@@ -1,7 +1,6 @@
 /* global beforeEach describe it */
 /* eslint-disable no-unused-expressions */
 const _ = require('underscore')
-const Promise = require('bluebird')
 const {expect} = require('chai')
 const Factory = require('../factory')
 const Player = require('../examples/player')
