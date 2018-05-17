@@ -1,7 +1,10 @@
 /* global beforeEach describe it */
 /* eslint-disable no-unused-expressions */
-const _ = require('underscore')
-const {expect} = require('chai')
+const first = require('lodash/first')
+const last = require('lodash/last')
+const map = require('lodash/map')
+const times = require('lodash/times')
+const { expect } = require('chai')
 const Factory = require('../factory')
 const Player = require('../examples/player')
 const Team = require('../examples/team')
@@ -68,7 +71,7 @@ describe('Schema', () => {
       return Team.removeById(team2.id).then(() => {
         return Team.query()
       }).then(function (teams) {
-        var ids = _.pluck(teams, 'id')
+        const ids = map(teams, 'id')
         expect(ids).to.eql([1])
       })
     })
@@ -99,24 +102,21 @@ describe('Schema', () => {
 
       it('should create multiple records', () => {
         return Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}]).then(function (teams) {
-          var first = _.first(teams)
-          var last = _.last(teams)
+          const firstTeam = first(teams)
+          const lastTeam = last(teams)
           expect(teams).to.have.length(3)
-          expect(last.id - first.id).to.eql(2)
+          expect(lastTeam.id - firstTeam.id).to.eql(2)
         })
       })
 
       it('should create a lot of records (in bulk)', function () {
         this.timeout(30000)
 
-        var records = _.times(10000, function (index) {
-          return { name: 'Bulk #' + (index + 1) }
-        })
-
+        const records = times(10000, (index) => ({ name: 'Bulk #' + (index + 1) }))
         return Team.create(records).then(function (teams) {
           expect(teams.length).to.eql(records.length)
-          _.each(records, function (record, index) {
-            var team = teams[index]
+          records.forEach((record, index) => {
+            const team = teams[index]
             expect(team.id).not.to.be.undefined
             expect(team.name).to.eql(record.name)
           })
@@ -141,10 +141,10 @@ describe('Schema', () => {
       it('should create multiple records @cleandb', () => {
         return knex.transaction(function (trx) {
           return Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}], trx).then(function (teams) {
-            var first = _.first(teams)
-            var last = _.last(teams)
+            const firstTeam = first(teams)
+            const lastTeam = last(teams)
             expect(teams).to.have.length(3)
-            expect(last.id - first.id).to.eql(2)
+            expect(lastTeam.id - firstTeam.id).to.eql(2)
           }).then(trx.commit)
         }).then(() => {
           return Team.query()
@@ -156,14 +156,11 @@ describe('Schema', () => {
       it('should create a lot of records (in bulk)', function () {
         this.timeout(30000)
 
-        var records = _.times(10000, function (index) {
-          return { name: 'Bulk #' + (index + 1) }
-        })
-
+        const records = times(10000, (index) => ({ name: 'Bulk #' + (index + 1) }))
         return knex.transaction(function (trx) {
           return Team.create(records, trx).then(function (teams) {
             expect(teams.length).to.eql(records.length)
-            _.each(records, function (record, index) {
+            records.forEach((record, index) => {
               var team = teams[index]
               expect(team.id).not.to.be.undefined
               expect(team.name).to.eql(record.name)
@@ -190,10 +187,10 @@ describe('Schema', () => {
       it('should NOT create multiple records', () => {
         return knex.transaction(function (trx) {
           return Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}], trx).then(function (teams) {
-            var first = _.first(teams)
-            var last = _.last(teams)
+            const firstTeam = first(teams)
+            const lastTeam = last(teams)
             expect(teams).to.have.length(3)
-            expect(last.id - first.id).to.eql(2)
+            expect(lastTeam.id - firstTeam.id).to.eql(2)
           }).then(trx.rollback)
         }).catch(function () {
           return Team.query()

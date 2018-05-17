@@ -1,12 +1,11 @@
 /* global describe it */
 /* eslint-disable no-unused-expressions */
-const _ = require('underscore')
-const {expect} = require('chai')
+const { expect } = require('chai')
 const ActiveKnex = require('../../index')
+const { arrayify, toLowerCamelCase, toSqlSnakeCase } = ActiveKnex.util
 
 describe('util', () => {
   describe('arrayify', () => {
-    var arrayify = ActiveKnex.util.arrayify
     it('convert everything to an array', () => {
       // Empty
       expect(arrayify()).to.eql([])
@@ -26,9 +25,7 @@ describe('util', () => {
   })
 
   describe('toSqlSnakeCase', () => {
-    var toSqlSnakeCase = ActiveKnex.util.toSqlSnakeCase
-
-    var examples = [{
+    const examples = [{
       before: 'select * from `tableName` order by `teamId` asc limit ?',
       after: 'select * from `table_name` order by `team_id` asc limit ?'
     }, {
@@ -43,17 +40,15 @@ describe('util', () => {
     }]
 
     it('should convert an SQL string to snake_case from lowerCamelCase', () => {
-      _.each(examples, function (example) {
-        var result = toSqlSnakeCase(example.before)
+      examples.forEach((example) => {
+        const result = toSqlSnakeCase(example.before)
         expect(result).to.eql(example.after)
       })
     })
   })
 
   describe('toLowerCamelCase', () => {
-    var toLowerCamelCase = ActiveKnex.util.toLowerCamelCase
-
-    var examples = [{
+    const examples = [{
       before: {name: 'test', s3_key: 'test', team_id: 'test'},
       after: {name: 'test', s3Key: 'test', teamId: 'test'}
     }, {
@@ -62,7 +57,7 @@ describe('util', () => {
     }]
 
     it('should convert an SQL response to lowerCamelCase from snake_case', () => {
-      _.each(examples, function (example) {
+      examples.forEach((example) => {
         var result = toLowerCamelCase(example.before)
         expect(result).to.eql(example.after)
       })
