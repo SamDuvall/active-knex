@@ -1,5 +1,5 @@
 const isString = require('lodash/isString')
-const Fields = require('../schema/fields')
+const Fields = require('../fields')
 const util = require('../util')
 const SELECT_METHODS = ['select', 'first']
 

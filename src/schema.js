@@ -12,7 +12,7 @@ const take = require('lodash/take')
 const uniq = require('lodash/uniq')
 
 const Promise = require('bluebird')
-const Fields = require('./schema/fields')
+const { FIELD_TYPES, mapSchemaFields } = require('./fields')
 const Query = require('./query')
 const util = require('./util')
 
@@ -28,7 +28,7 @@ class Schema {
 
   constructor (knex, options) {
     Object.assign(this, DEFAULT_OPTIONS, options)
-    this.fields = Fields.mapSchema(this.fields)
+    this.fields = mapSchemaFields(this.fields)
     this.query = Query.generate.bind(null, knex, this)
     this.raw = knex.raw.bind(knex)
     this.transaction = knex.transaction.bind(knex)
@@ -212,6 +212,6 @@ class Schema {
   }
 }
 
-Schema.fields = Fields.known
+Schema.fields = FIELD_TYPES
 
 module.exports = Schema
