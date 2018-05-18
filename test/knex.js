@@ -1,2 +1,8 @@
+const knex = require('knex')
 const config = require('../knexfile').test
-module.exports = require('knex')(config)
+const { postProcessResponse, wrapIdentifier } = require('..')
+module.exports = knex({
+  ...config,
+  postProcessResponse,
+  wrapIdentifier
+})

@@ -1,8 +1,8 @@
 /* global describe it */
 /* eslint-disable no-unused-expressions */
 const { expect } = require('chai')
-const ActiveKnex = require('../../index')
-const { arrayify, toLowerCamelCase, toSqlSnakeCase } = ActiveKnex.util
+const knex = require('../knex')
+const { arrayify } = require('../../index')
 
 describe('util', () => {
   describe('arrayify', () => {
@@ -25,41 +25,21 @@ describe('util', () => {
   })
 
   describe('toSqlSnakeCase', () => {
-    const examples = [{
-      before: 'select * from `tableName` order by `teamId` asc limit ?',
-      after: 'select * from `table_name` order by `team_id` asc limit ?'
+    const tests = [{
+      qb: knex('tableName').orderBy('teamId', 'asc').limit(5),
+      sql: 'select * from `table_name` order by `team_id` asc limit ?'
     }, {
-      before: 'insert into `tableName` (`createdAt`, `name`, `teamId`, `s3Key`, `updatedAt`) values (?, ?, ?, ?)',
-      after: 'insert into `table_name` (`created_at`, `name`, `team_id`, `s3_key`, `updated_at`) values (?, ?, ?, ?)'
+      qb: knex('tableName').insert({ createdAt: null, name: null, s3Key: null, teamId: null, updatedAt: null }),
+      sql: 'insert into `table_name` (`created_at`, `name`, `s3_key`, `team_id`, `updated_at`) values (?, ?, ?, ?, ?)'
     }, {
-      before: 'update `tableName` set `email` = ?, `name` = ?, `updatedAt` = ? where `id` = ?',
-      after: 'update `table_name` set `email` = ?, `name` = ?, `updated_at` = ? where `id` = ?'
-    }, {
-      before: 'SELECT id, JSON_EXTRACT(handbooks.prevBranding, "$.handbookCss") FROM handbooks WHERE JSON_EXTRACT(handbooks.prevBranding, "$.handbookCss") IS NOT NULL',
-      after: 'SELECT id, JSON_EXTRACT(handbooks.prev_branding, "$.handbookCss") FROM handbooks WHERE JSON_EXTRACT(handbooks.prev_branding, "$.handbookCss") IS NOT NULL'
+      qb: knex('tableName').update({ email: null, name: null, updatedAt: null }).where({id: 1}),
+      sql: 'update `table_name` set `email` = ?, `name` = ?, `updated_at` = ? where `id` = ?'
     }]
 
     it('should convert an SQL string to snake_case from lowerCamelCase', () => {
-      examples.forEach((example) => {
-        const result = toSqlSnakeCase(example.before)
-        expect(result).to.eql(example.after)
-      })
-    })
-  })
-
-  describe('toLowerCamelCase', () => {
-    const examples = [{
-      before: {name: 'test', s3_key: 'test', team_id: 'test'},
-      after: {name: 'test', s3Key: 'test', teamId: 'test'}
-    }, {
-      before: [{name: 'test', s3_key: 'test', team_id: 'test'}],
-      after: [{name: 'test', s3Key: 'test', teamId: 'test'}]
-    }]
-
-    it('should convert an SQL response to lowerCamelCase from snake_case', () => {
-      examples.forEach((example) => {
-        var result = toLowerCamelCase(example.before)
-        expect(result).to.eql(example.after)
+      tests.forEach((test) => {
+        const sql = test.qb.toSQL().sql
+        expect(sql).to.eql(test.sql)
       })
     })
   })
