@@ -10,11 +10,10 @@ const omit = require('lodash/omit')
 const pick = require('lodash/pick')
 const take = require('lodash/take')
 const uniq = require('lodash/uniq')
-
 const Promise = require('bluebird')
 const { FIELD_TYPES, mapSchemaFields } = require('./fields')
-const Query = require('./query')
-const util = require('./util')
+const QueryBuilder = require('./query')
+const { arrayify } = require('./util')
 
 const DEFAULT_OPTIONS = {
   primaryKey: 'id'
@@ -29,13 +28,18 @@ class Schema {
   constructor (knex, options) {
     Object.assign(this, DEFAULT_OPTIONS, options)
     this.fields = mapSchemaFields(this.fields)
-    this.query = Query.generate.bind(null, knex, this)
     this.raw = knex.raw.bind(knex)
     this.transaction = knex.transaction.bind(knex)
 
-    // Add to joins table for the connection
-    knex.joins = knex.joins || {}
-    knex.joins[this.tableName] = this.joins
+    // Create the query builder
+    this.query = () => {
+      const qb = new QueryBuilder(knex.client, this)
+      Object.assign(qb, this.queries)
+      return qb.table(this.tableName)
+    }
+
+    // Save joins
+    QueryBuilder.joins[this.tableName] = this.joins
   }
 
   // Create a where shortcut that creates a query and starts with this transaction
@@ -80,7 +84,7 @@ class Schema {
     const { fields } = this
 
     // If no entries, then do nothing
-    const entries = util.arrayify(data)
+    const entries = arrayify(data)
     if (entries.length === 0) return Promise.resolve(entries)
 
     // Ensure each entry has create/update times
@@ -99,7 +103,7 @@ class Schema {
   // Insert data and then return the data inserted
   insertAndSelect (data, trx) {
     const { primaryKey } = this
-    const entries = util.arrayify(data)
+    const entries = arrayify(data)
     return this.transacting(trx).insert(data).then((result) => { // Query the rows back
       const id = first(result)
       const qb = this.transacting(trx)
@@ -183,7 +187,7 @@ class Schema {
 
     // Pull off the data to load into
     const firstArg = first(arguments)
-    const rows = util.arrayify(firstArg)
+    const rows = arrayify(firstArg)
 
     // Pull off a transaction (if present)
     const lastArg = last(arguments)
