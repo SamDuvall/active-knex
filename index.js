@@ -1,5 +1,5 @@
-module.exports = {
-  Relation: require('./lib/relation'),
-  Schema: require('./lib/schema'),
-  util: require('./lib/util')
-}
+const util = require('./src/util')
+module.exports = Object.assign({
+  Relation: require('./src/relation'),
+  Schema: require('./src/schema')
+}, util)
