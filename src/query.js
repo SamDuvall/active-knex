@@ -103,8 +103,8 @@ class QueryBuilder extends KnexQueryBuilder {
     }
 
     if (sortKey) {
-      const ascii = Buffer.from(sortKey, 'base64').toString('ascii')
-      const sortKeys = JSON.parse(ascii)
+      const str = Buffer.from(sortKey, 'base64').toString('utf8')
+      const sortKeys = JSON.parse(str)
       whereSortOrders(this, orders, sortKeys)
     }
 

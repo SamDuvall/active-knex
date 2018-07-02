@@ -1,7 +1,7 @@
 {
   "name": "active-knex",
   "description": "Adding ActiveRecord-esque functionality to knex",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "license": "MIT",
   "author": "Sam Duvall <https://github.com/SamDuvall>",
   "keywords": [
@@ -32,7 +32,6 @@
     "standard": "^11.0.1"
   },
   "scripts": {
-    "build": "bash node_modules/knex/scripts/build.sh",
     "lint": "standard -v",
     "test": "npm run lint && npm run test:code",
     "test:code": "mocha"
