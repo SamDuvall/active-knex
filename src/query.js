@@ -3,10 +3,10 @@ const find = require('lodash/find')
 const get = require('lodash/get')
 const isString = require('lodash/isString')
 const pick = require('lodash/pick')
-const underscored = require('underscore.string/underscored')
 const KnexQueryBuilder = require('knex/lib/query/builder')
 const { mapFieldToDb, mapFieldsFromDb, mapFieldsToDb } = require('./fields')
-const { arrayify, parseColumn } = require('./util')
+const { orderAfter, orderBy } = require('./sort')
+const { arrayify } = require('./util')
 const SELECT_METHODS = ['select', 'first']
 
 const OPTIONS = ['fields', 'primaryKey', 'tableName']
@@ -81,15 +81,10 @@ class QueryBuilder extends KnexQueryBuilder {
   // Allow multiple order bys in array desc via '-column_name'
   orderBy (order) {
     // Base call
-    if (arguments.length === 2) super.orderBy.apply(this, arguments)
+    if (arguments.length === 2) return super.orderBy.apply(this, arguments)
 
     // Custom call
-    const orders = arrayify(order)
-    orders.forEach((order) => {
-      const { column, desc } = parseColumn(order)
-      super.orderBy(column, desc ? 'desc' : 'asc')
-    })
-    return this
+    return orderBy(this, order)
   }
 
   // Get the entries after the sort key provided in the order
@@ -102,59 +97,10 @@ class QueryBuilder extends KnexQueryBuilder {
       orders = [...orders, primaryKeyOrder]
     }
 
-    if (sortKey) {
-      const str = Buffer.from(sortKey, 'base64').toString('utf8')
-      const sortKeys = JSON.parse(str)
-      whereSortOrders(this, orders, sortKeys)
-    }
-
-    const columns = orders.map(parseColumn).map(col => col.column).map(underscored)
-    const select = this.client.raw(`TO_BASE64(JSON_ARRAY(${columns.join(',')})) AS sort_key`)
-    return this.orderBy(orders).select(select)
+    return orderAfter(this, orders, sortKey)
   }
 }
 
 QueryBuilder.joins = {}
-
-// Sorting --------------------------------------------------------------------
-
-const whereSortOrders = (qb, orders, sortKeys) => {
-  if (orders.length !== sortKeys.length) throw new Error('Invalid Sort Keys')
-
-  const [ order, ...restOrders ] = orders
-  const [ sortKey, ...restSortKeys ] = sortKeys
-  const { column, desc } = parseColumn(order)
-
-  qb.where((qb) => {
-    if (sortKey !== null) {
-      if (desc) {
-        qb.where(column, '<', sortKey)
-        qb.orWhereNull(column)
-      } else {
-        qb.where(column, '>', sortKey)
-      }
-
-      if (restOrders.length) {
-        qb.orWhere((nextQb) => {
-          nextQb.where(column, '=', sortKey)
-          whereSortOrders(nextQb, restOrders, restSortKeys)
-        })
-      }
-    } else {
-      if (desc) {
-        qb.whereNull(column)
-        whereSortOrders(qb, restOrders, restSortKeys)
-      } else {
-        qb.whereNotNull(column)
-        if (restOrders.length) {
-          qb.orWhere((nextQb) => {
-            qb.whereNull(column)
-            whereSortOrders(nextQb, restOrders, restSortKeys)
-          })
-        }
-      }
-    }
-  })
-}
 
 module.exports = QueryBuilder
