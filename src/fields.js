@@ -16,7 +16,8 @@ const FIELD_TYPES = {
 
     toDb: function (value) {
       if (value === null) return null
-      return value.join(',')
+      if (isArray(value)) value = value.join(',')
+      return value
     }
   },
 
@@ -29,7 +30,8 @@ const FIELD_TYPES = {
 
     toDb: function (value) {
       if (value === null) return null
-      return value.join(',')
+      if (isArray(value)) value = value.join(',')
+      return value
     }
   },
 
