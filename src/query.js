@@ -24,6 +24,12 @@ class QueryBuilder extends KnexQueryBuilder {
     return Object.assign(qb, options)
   }
 
+  // TODO: This work around an undefined transaction
+  transacting (trx) {
+    if (trx === undefined) return this
+    return super.transacting(trx)
+  }
+
   // Insert a row into the table, by converting the fields and then
   // returning the created rows
   insert (data, returning) {
@@ -59,7 +65,7 @@ class QueryBuilder extends KnexQueryBuilder {
       // Go through the dots
       let from = this.tableName
       name.split('.').forEach((to) => {
-        if (!find(this.joined, {from, to})) {
+        if (!find(this.joined, { from, to })) {
           const joinsFrom = QueryBuilder.joins[from]
           const join = get(joinsFrom, to)
           if (!join) throw new Error(`No join from ${from} to ${to}`)
@@ -69,7 +75,7 @@ class QueryBuilder extends KnexQueryBuilder {
 
           // Add to joined list
           this.joined = this.joined || []
-          this.joined.push({from, to})
+          this.joined.push({ from, to })
         }
 
         from = to

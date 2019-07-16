@@ -1,6 +1,6 @@
 /* global describe it */
 /* eslint-disable no-unused-expressions */
-const {expect} = require('chai')
+const { expect } = require('chai')
 const { FIELD_TYPES } = require('../../src/fields')
 
 describe('Schema Fields', () => {
@@ -107,13 +107,13 @@ describe('Schema Fields', () => {
       describe('fromDb', () => {
         it('should convert valid JSON', () => {
           var fromDb = FIELD_TYPES.json.fromDb('{"foo":"bar"}')
-          expect(fromDb).to.eql({foo: 'bar'})
+          expect(fromDb).to.eql({ foo: 'bar' })
         })
       })
 
       describe('toDb', () => {
         it('should convert object', () => {
-          var toDb = FIELD_TYPES.json.toDb({foo: 'bar'})
+          var toDb = FIELD_TYPES.json.toDb({ foo: 'bar' })
           expect(toDb).to.eql('{"foo":"bar"}')
         })
       })

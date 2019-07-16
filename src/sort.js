@@ -13,7 +13,7 @@ const orderBy = (qb, order) => {
 
 // Get the entries after the sort key provided in the order
 const orderAfter = (qb, order, sortKey) => {
-  let orders = arrayify(order)
+  const orders = arrayify(order)
 
   if (sortKey) {
     const str = Buffer.from(sortKey, 'base64').toString('utf8')
@@ -29,8 +29,8 @@ const orderAfter = (qb, order, sortKey) => {
 const whereOrders = (qb, orders, sortKeys) => {
   if (orders.length !== sortKeys.length) throw new Error('Invalid Sort Keys')
 
-  const [ order, ...restOrders ] = orders
-  const [ sortKey, ...restSortKeys ] = sortKeys
+  const [order, ...restOrders] = orders
+  const [sortKey, ...restSortKeys] = sortKeys
   const { column, desc } = parseColumn(order)
 
   qb.where((qb) => {

@@ -4,7 +4,7 @@ const first = require('lodash/first')
 const last = require('lodash/last')
 const map = require('lodash/map')
 const times = require('lodash/times')
-const {expect} = require('chai')
+const { expect } = require('chai')
 const Factory = require('../factory')
 const Player = require('../examples/player')
 const Team = require('../examples/team')
@@ -99,7 +99,7 @@ describe('Query @cleandb', () => {
     describe('no nulls', () => {
       it('should return the 1st 2 teams', async () => {
         const order = 'name'
-        let rows = await Team.query().after(order).select('teams.*').limit(2)
+        const rows = await Team.query().after(order).select('teams.*').limit(2)
         const result = map(rows, 'name')
         expect(result).to.eql(['Team 1', 'Team 2'])
       })
@@ -115,7 +115,7 @@ describe('Query @cleandb', () => {
 
       it('should return the Last 2 teams', async () => {
         const order = '-name'
-        let rows = await Team.query().after(order).select('teams.*').limit(2)
+        const rows = await Team.query().after(order).select('teams.*').limit(2)
         const result = map(rows, 'name')
         expect(result).to.eql(['Team 5', 'Team 4'])
       })
@@ -139,7 +139,7 @@ describe('Query @cleandb', () => {
 
       it('should return the 1st 2 teams', async () => {
         const order = 'name'
-        let rows = await Team.query().after(order).select('teams.*').limit(2)
+        const rows = await Team.query().after(order).select('teams.*').limit(2)
         const result = map(rows, 'name')
         expect(result).to.eql([null, null])
       })
@@ -164,7 +164,7 @@ describe('Query @cleandb', () => {
 
       it('should return the Last 2 teams', async () => {
         const order = '-name'
-        let rows = await Team.query().after(order).select('teams.*').limit(2)
+        const rows = await Team.query().after(order).select('teams.*').limit(2)
         const result = map(rows, 'name')
         expect(result).to.eql(['Team 5', 'Team 4'])
       })
@@ -210,7 +210,7 @@ describe('Query @cleandb', () => {
       })
 
       it('should return the 1st 3 teams', async () => {
-        let rows = await Team.query().after(columns).select('teams.*').limit(3)
+        const rows = await Team.query().after(columns).select('teams.*').limit(3)
 
         const names = map(rows, 'name')
         const archiveds = map(rows, 'archived')
@@ -243,7 +243,7 @@ describe('Query @cleandb', () => {
 
     it('should update a record (multiple)', () => {
       var team = first(teams)
-      return Team.where('id', team.id).update({tags: ['chicago', 'dc']}).then(function (result) {
+      return Team.where('id', team.id).update({ tags: ['chicago', 'dc'] }).then(function (result) {
         return Team.findById(team.id)
       }).then(function (team) {
         expect(team.tags).to.eql(['chicago', 'dc'])

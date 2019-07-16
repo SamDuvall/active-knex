@@ -49,8 +49,8 @@ const FIELD_TYPES = {
 // Map fields defined on a schema
 const mapSchemaFields = (fields = {}) => {
   // If time fields are "true", then configure them as dates
-  if (fields.createdAt === true) fields.createdAt = {type: 'date'}
-  if (fields.updatedAt === true) fields.updatedAt = {type: 'date'}
+  if (fields.createdAt === true) fields.createdAt = { type: 'date' }
+  if (fields.updatedAt === true) fields.updatedAt = { type: 'date' }
   return fields
 }
 

@@ -10,7 +10,6 @@ const omit = require('lodash/omit')
 const pick = require('lodash/pick')
 const take = require('lodash/take')
 const uniq = require('lodash/uniq')
-const Promise = require('bluebird')
 const { FIELD_TYPES, mapSchemaFields } = require('./fields')
 const QueryBuilder = require('./query')
 const { arrayify } = require('./util')
@@ -80,12 +79,12 @@ class Schema {
   // UPDATE / CREATE ----------------------------------------------------------
 
   // Create single OR multiple rows of data
-  create (data, trx) {
+  async create (data, trx) {
     const { fields } = this
 
     // If no entries, then do nothing
     const entries = arrayify(data)
-    if (entries.length === 0) return Promise.resolve(entries)
+    if (entries.length === 0) return entries
 
     // Ensure each entry has create/update times
     const createdAt = new Date()
@@ -120,14 +119,14 @@ class Schema {
   }
 
   // Bulk insert the data in batches, to not overflow the pools/sql bounds
-  bulkInsertAndSelect (entries, trx) {
+  async bulkInsertAndSelect (entries, trx) {
     // Determine the next batch
     const { insertMaxLength = 1000 } = this
     const batch = take(entries, insertMaxLength)
     const remaining = drop(entries, batch.length)
 
     // If the batch is empty, move on
-    if (!batch.length) return Promise.resolve(batch)
+    if (!batch.length) return batch
 
     // Run the next batch
     return this.insertAndSelect(batch, trx).then((batchRows) => {
@@ -138,12 +137,12 @@ class Schema {
   }
 
   // Update this data (must have id)
-  update (data, changes, trx) {
+  async update (data, changes, trx) {
     const { fields, primaryKey } = this
 
     // If no changes, do nothing
     const isChanges = Object.keys(changes).length > 0
-    if (!isChanges) return Promise.resolve(data)
+    if (!isChanges) return data
 
     // Update updated_at, if necessary
     const updatedAt = new Date()
@@ -182,7 +181,7 @@ class Schema {
   // (first parameter - required) - object OR array to load relations ONTO
   // (remaining parameters) - list of relations to load
   // (last parameter - optional) - transaction to with
-  load (data) {
+  async load (data) {
     const { relations } = this
 
     // Pull off the data to load into
@@ -198,21 +197,23 @@ class Schema {
 
     // Load the primary relations (e.g. 'teams')
     const primaries = names.map(name => first(name.split('.')))
-    return Promise.each(uniq(primaries), (name) => {
-      const relation = relations[name]()
-      return relation.load(rows, name, trx)
-    }).then(() => {
-      // Load secondary relations (e.g. 'teams.owner')
-      const secondary = names.filter(name => name.split('.').length > 1)
-      return Promise.each(secondary, function (name) {
-        const [through, ...rest] = name.split('.')
-        const nextName = rest.join('.')
+    for (const primary of uniq(primaries)) {
+      const relation = relations[primary]()
+      await relation.load(rows, primary, trx)
+    }
 
-        const relation = relations[through]()
-        const subRows = flatMap(rows, through)
-        return relation.model.load(subRows, nextName, trx)
-      })
-    }).return(data)
+    // Load secondary relations (e.g. 'teams.owner')
+    const secondaries = names.filter(name => name.split('.').length > 1)
+    for (const secondary of secondaries) {
+      const [through, ...rest] = secondary.split('.')
+      const nextName = rest.join('.')
+
+      const relation = relations[through]()
+      const subRows = flatMap(rows, through)
+      await relation.model.load(subRows, nextName, trx)
+    }
+
+    return data
   }
 }
 

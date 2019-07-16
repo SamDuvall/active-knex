@@ -1,5 +1,5 @@
 const isArray = require('lodash/isArray')
-const {Factory} = require('rosie')
+const { Factory } = require('rosie')
 const Player = require('./examples/player')
 const Team = require('./examples/team')
 require('./database')

@@ -1,7 +1,6 @@
 /* global after before beforeEach */
 const flatMap = require('lodash/flatMap')
 const values = require('lodash/values')
-const Promise = require('bluebird')
 const knex = require('./knex')
 
 // Tables
@@ -9,8 +8,10 @@ let tablesCache
 const getTables = () => knex.transaction(trx => {
   return trx.raw('SHOW TABLES').spread(rows => flatMap(rows, row => values(row)[0]))
 })
-const truncateTables = (tables) => knex.transaction(trx => {
-  return Promise.map(tables, (table) => knex(table).transacting(trx).truncate())
+const truncateTables = (tables) => knex.transaction(async (trx) => {
+  for (const table of tables) {
+    await knex(table).transacting(trx).truncate()
+  }
 })
 
 // Operations
@@ -26,7 +27,7 @@ before(async function () {
 
 const isClean = (ctx) => ctx.title.includes('@cleandb')
 const hasClean = (ctx) => {
-  const {parent} = ctx
+  const { parent } = ctx
   return isClean(ctx) || (parent && hasClean(parent))
 }
 
@@ -38,4 +39,4 @@ beforeEach(function () {
 // All done, disconnect
 after(() => knex.destroy())
 
-module.exports = {cleanDatabase}
+module.exports = { cleanDatabase }

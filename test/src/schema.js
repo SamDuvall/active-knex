@@ -17,10 +17,10 @@ describe('Schema', () => {
   var player
   var player2
   beforeEach(async () => {
-    team = await Factory.create('team', {tags: ['alpha', 'beta']})
-    team2 = await Factory.create('team', {archived: true})
+    team = await Factory.create('team', { tags: ['alpha', 'beta'] })
+    team2 = await Factory.create('team', { archived: true })
 
-    teamBus = await Factory.create('team.bus', {teamId: team.id})
+    teamBus = await Factory.create('team.bus', { teamId: team.id })
 
     player = await Factory.create('player', {
       teamId: team.id,
@@ -29,7 +29,7 @@ describe('Schema', () => {
         bases: [1, 2, 3]
       }
     })
-    player2 = await Factory.create('player', {teamId: team.id})
+    player2 = await Factory.create('player', { teamId: team.id })
   })
 
   describe('fields', () => {
@@ -94,14 +94,14 @@ describe('Schema', () => {
       })
 
       it('should create a single record', () => {
-        return Team.create({name: 'Team Name'}).then(function (team) {
+        return Team.create({ name: 'Team Name' }).then(function (team) {
           expect(team.id).to.not.be.undefined
           expect(team.name).to.eql('Team Name')
         })
       })
 
       it('should create multiple records', () => {
-        return Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}]).then(function (teams) {
+        return Team.create([{ name: 'Team One' }, { name: 'Team Two' }, { name: 'Team Three' }]).then(function (teams) {
           const firstTeam = first(teams)
           const lastTeam = last(teams)
           expect(teams).to.have.length(3)
@@ -127,7 +127,7 @@ describe('Schema', () => {
     describe('commit transaction', () => {
       it('should create a single record', () => {
         return knex.transaction(function (trx) {
-          return Team.create({name: 'Team Name'}, trx).then(function (team) {
+          return Team.create({ name: 'Team Name' }, trx).then(function (team) {
             expect(team.id).to.not.be.undefined
             expect(team.name).to.eql('Team Name')
           }).then(trx.commit)
@@ -140,7 +140,7 @@ describe('Schema', () => {
 
       it('should create multiple records @cleandb', () => {
         return knex.transaction(function (trx) {
-          return Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}], trx).then(function (teams) {
+          return Team.create([{ name: 'Team One' }, { name: 'Team Two' }, { name: 'Team Three' }], trx).then(function (teams) {
             const firstTeam = first(teams)
             const lastTeam = last(teams)
             expect(teams).to.have.length(3)
@@ -173,7 +173,7 @@ describe('Schema', () => {
     describe('rollback transaction @cleandb', () => {
       it('should NOT create a single record', () => {
         return knex.transaction(function (trx) {
-          return Team.create({name: 'Team Name'}, trx).then(function (team) {
+          return Team.create({ name: 'Team Name' }, trx).then(function (team) {
             expect(team.id).to.not.be.undefined
             expect(team.name).to.eql('Team Name')
           }).then(() => trx.rollback())
@@ -186,7 +186,7 @@ describe('Schema', () => {
 
       it('should NOT create multiple records', () => {
         return knex.transaction(function (trx) {
-          return Team.create([{name: 'Team One'}, {name: 'Team Two'}, {name: 'Team Three'}], trx).then(function (teams) {
+          return Team.create([{ name: 'Team One' }, { name: 'Team Two' }, { name: 'Team Three' }], trx).then(function (teams) {
             const firstTeam = first(teams)
             const lastTeam = last(teams)
             expect(teams).to.have.length(3)
@@ -204,7 +204,7 @@ describe('Schema', () => {
   describe('update', () => {
     describe('no transaction', () => {
       it('should update a record (multiple)', () => {
-        return Team.update(team, {archived: true, tags: null}).then(function (result) {
+        return Team.update(team, { archived: true, tags: null }).then(function (result) {
           return Team.findById(team.id)
         }).then(function (team) {
           expect(team.archived).to.be.true
@@ -213,7 +213,7 @@ describe('Schema', () => {
       })
 
       it('should update a record (custom primaryKey)', () => {
-        return Team.Bus.update(teamBus, {driver: 'New Driver'}).then(function (result) {
+        return Team.Bus.update(teamBus, { driver: 'New Driver' }).then(function (result) {
           return Team.Bus.findById(teamBus.teamId)
         }).then(function (teamBus) {
           expect(teamBus.driver).to.equal('New Driver')
@@ -224,7 +224,7 @@ describe('Schema', () => {
     describe('commit transaction', () => {
       it('should update a record', () => {
         return knex.transaction(function (trx) {
-          return Team.update(team, {name: 'New Name'}, trx).then(function (team) {
+          return Team.update(team, { name: 'New Name' }, trx).then(function (team) {
             expect(team.name).to.eql('New Name')
           }).then(trx.commit)
         }).then(() => {
@@ -238,7 +238,7 @@ describe('Schema', () => {
     describe('rollback transaction @cleandb', () => {
       it('should NOT update a record', () => {
         return knex.transaction(function (trx) {
-          return Team.update(team, {name: 'New Name'}, trx).then(function (team) {
+          return Team.update(team, { name: 'New Name' }, trx).then(function (team) {
             expect(team.name).to.eql('New Name')
           }).then(trx.rollback)
         }).catch(() => {
@@ -253,13 +253,13 @@ describe('Schema', () => {
   describe('findOrCreate', () => {
     describe('no transaction', () => {
       it('should find a record', () => {
-        return Team.findOrCreate({name: team.name}).then(function (result) {
+        return Team.findOrCreate({ name: team.name }).then(function (result) {
           expect(result.id).to.eql(team.id)
         })
       })
 
       it('should create a record', () => {
-        return Team.findOrCreate({name: 'New Name'}).then(function (result) {
+        return Team.findOrCreate({ name: 'New Name' }).then(function (result) {
           expect(result.id).to.not.eql(team.id)
         })
       })
@@ -268,7 +268,7 @@ describe('Schema', () => {
     describe('commit transaction', () => {
       it('should find a record', () => {
         return knex.transaction(function (trx) {
-          return Team.findOrCreate({name: team.name}, trx).then(function (result) {
+          return Team.findOrCreate({ name: team.name }, trx).then(function (result) {
             expect(result.id).to.eql(team.id)
           }).then(trx.commit)
         })
@@ -276,7 +276,7 @@ describe('Schema', () => {
 
       it('should create a record', () => {
         return knex.transaction(function (trx) {
-          return Team.findOrCreate({name: 'Team Name'}, trx).then(function (result) {
+          return Team.findOrCreate({ name: 'Team Name' }, trx).then(function (result) {
             expect(result.id).to.not.eql(team.id)
           }).then(trx.commit)
         }).then(() => {
@@ -290,7 +290,7 @@ describe('Schema', () => {
     describe('rollback transaction @cleandb', () => {
       it('should NOT create a record', () => {
         return knex.transaction(function (trx) {
-          return Team.findOrCreate({name: 'Team Name'}, trx).then(function (result) {
+          return Team.findOrCreate({ name: 'Team Name' }, trx).then(function (result) {
             expect(result.id).to.not.eql(team.id)
           }).then(trx.rollback)
         }).catch(function () {
@@ -304,20 +304,20 @@ describe('Schema', () => {
 
   describe('updateOrCreate', () => {
     it('should find a record', () => {
-      return Team.updateOrCreate({name: team.name}).then(function (result) {
+      return Team.updateOrCreate({ name: team.name }).then(function (result) {
         expect(result.id).to.eql(team.id)
       })
     })
 
     it('should update a record', () => {
-      return Team.updateOrCreate({name: team.name, archived: true}).then(function (result) {
+      return Team.updateOrCreate({ name: team.name, archived: true }).then(function (result) {
         expect(result.id).to.eql(team.id)
         expect(result.archived).to.be.true
       })
     })
 
     it('should create a record', () => {
-      return Team.updateOrCreate({name: 'New Name', archived: true}).then(function (result) {
+      return Team.updateOrCreate({ name: 'New Name', archived: true }).then(function (result) {
         expect(result.id).to.not.eql(team.id)
         expect(result.archived).to.be.true
       })

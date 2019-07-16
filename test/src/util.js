@@ -32,7 +32,7 @@ describe('util', () => {
       qb: knex('tableName').insert({ createdAt: null, name: null, s3Key: null, teamId: null, updatedAt: null }),
       sql: 'insert into `table_name` (`created_at`, `name`, `s3_key`, `team_id`, `updated_at`) values (?, ?, ?, ?, ?)'
     }, {
-      qb: knex('tableName').update({ email: null, name: null, updatedAt: null }).where({id: 1}),
+      qb: knex('tableName').update({ email: null, name: null, updatedAt: null }).where({ id: 1 }),
       sql: 'update `table_name` set `email` = ?, `name` = ?, `updated_at` = ? where `id` = ?'
     }]
 
