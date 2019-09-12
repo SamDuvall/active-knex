@@ -228,8 +228,6 @@ describe('Query @cleandb', () => {
     })
 
     describe('multiple columns', () => {
-      const order = ['name', '-archived']
-
       beforeEach(async () => {
         const moreTeams = await Factory.create('team', times(5, (index) => ({
           name: `Team ${index + 1}`,

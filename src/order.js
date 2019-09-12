@@ -1,3 +1,5 @@
+const underscored = require('underscore.string/underscored')
+
 class Order {
   static fromJSON (json) {
     return Object.assign(new Order(), json)
@@ -23,7 +25,7 @@ class Order {
   get isDesc () { return this.order === 'DESC' && !this.isReversed }
 
   toString () {
-    return `${this.isReversed ? '-' : ''}${this.column} ${this.order}`
+    return `${this.isReversed ? '-' : ''}${underscored(this.column)} ${this.order}`
   }
 }
 
