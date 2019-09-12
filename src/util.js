@@ -11,15 +11,6 @@ const arrayify = (value) => {
   else return [value]
 }
 
-// Parse this column for ordering
-const parseColumn = (column) => {
-  const desc = column[0] === '-'
-  return {
-    column: desc ? column.substr(1) : column,
-    desc
-  }
-}
-
 // snake_case to camelCase
 const toCamelCase = (value) => camelCase(value)
 const camelizeKeys = (object) => mapKeys(object, (value, key) => toCamelCase(key))
@@ -38,7 +29,6 @@ const wrapIdentifier = (value, origImpl, queryContext) => {
 
 module.exports = {
   arrayify,
-  parseColumn,
 
   postProcessResponse,
   wrapIdentifier

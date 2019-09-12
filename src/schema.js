@@ -43,7 +43,9 @@ class Schema {
 
   // Create a where shortcut that creates a query and starts with this transaction
   transacting (trx) {
-    return this.query().transacting(trx)
+    let qb = this.query()
+    if (trx) qb = qb.transacting(trx)
+    return qb
   }
 
   // Create a where shortcut that creates a query and starts with where

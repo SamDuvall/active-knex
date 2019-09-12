@@ -3,12 +3,14 @@
 const first = require('lodash/first')
 const last = require('lodash/last')
 const map = require('lodash/map')
+const pick = require('lodash/pick')
 const times = require('lodash/times')
 const { expect } = require('chai')
 const Factory = require('../factory')
 const Player = require('../examples/player')
 const Team = require('../examples/team')
 const knex = require('../knex')
+const { arrayify } = require('../../index')
 
 describe('Query @cleandb', () => {
   var teams
@@ -96,38 +98,61 @@ describe('Query @cleandb', () => {
   })
 
   describe('after', () => {
+    const runTest = (test) => {
+      const { order, step } = test
+      const orderName = arrayify(order).join(', ')
+      it(`should order by ${orderName} by ${step}s`, async () => {
+        let index = 0
+        let lastRow
+        while (index < test.expected.length) {
+          // Get rows
+          const { sortKey } = lastRow || {}
+          const expected = test.expected.slice(index, index + step)
+          const qb = Team.query().after(order, sortKey).select('teams.*').limit(expected.length)
+          const rows = await qb
+          lastRow = last(rows)
+
+          // Compare results
+          expect(rows.length).to.eql(expected.length)
+          expected.forEach((expected, index) => {
+            const keys = Object.keys(expected)
+            const actual = pick(rows[index], keys)
+            expect(expected).to.eql(actual)
+          })
+
+          index += step
+        }
+      })
+    }
+
     describe('no nulls', () => {
-      it('should return the 1st 2 teams', async () => {
-        const order = 'name'
-        const rows = await Team.query().after(order).select('teams.*').limit(2)
-        const result = map(rows, 'name')
-        expect(result).to.eql(['Team 1', 'Team 2'])
-      })
+      const tests = [{
+        order: 'name',
+        step: 2,
+        expected: [{
+          name: 'Team 1'
+        }, {
+          name: 'Team 2'
+        }, {
+          name: 'Team 3'
+        }, {
+          name: 'Team 4'
+        }]
+      }, {
+        order: '-name',
+        step: 2,
+        expected: [{
+          name: 'Team 5'
+        }, {
+          name: 'Team 4'
+        }, {
+          name: 'Team 3'
+        }, {
+          name: 'Team 2'
+        }]
+      }]
 
-      it('should return the 2nd 2 teams', async () => {
-        const order = 'name'
-        let rows = await Team.query().after(order).select('teams.*').limit(2)
-        const { sortKey } = last(rows)
-        rows = await Team.query().after(order, sortKey).select('teams.*').limit(2)
-        const result = map(rows, 'name')
-        expect(result).to.eql(['Team 3', 'Team 4'])
-      })
-
-      it('should return the Last 2 teams', async () => {
-        const order = '-name'
-        const rows = await Team.query().after(order).select('teams.*').limit(2)
-        const result = map(rows, 'name')
-        expect(result).to.eql(['Team 5', 'Team 4'])
-      })
-
-      it('should return the 2nd to Last 2 teams', async () => {
-        const order = '-name'
-        let rows = await Team.query().after(order).select('teams.*').limit(2)
-        const { sortKey } = last(rows)
-        rows = await Team.query().after(order, sortKey).select('teams.*').limit(2)
-        const result = map(rows, 'name')
-        expect(result).to.eql(['Team 3', 'Team 2'])
-      })
+      tests.forEach(runTest)
     })
 
     describe('with nulls', () => {
@@ -137,68 +162,73 @@ describe('Query @cleandb', () => {
         teams = [...teams, ...moreTeams]
       })
 
-      it('should return the 1st 2 teams', async () => {
-        const order = 'name'
-        const rows = await Team.query().after(order).select('teams.*').limit(2)
-        const result = map(rows, 'name')
-        expect(result).to.eql([null, null])
-      })
+      const tests = [{
+        order: 'name',
+        step: 2,
+        expected: [{
+          name: null
+        }, {
+          name: null
+        }, {
+          name: null
+        }, {
+          name: 'Team 1'
+        }, {
+          name: 'Team 2'
+        }, {
+          name: 'Team 3'
+        }, {
+          name: 'Team 4'
+        }, {
+          name: 'Team 5'
+        }]
+      }, {
+        order: '-name',
+        step: 2,
+        expected: [{
+          name: 'Team 5'
+        }, {
+          name: 'Team 4'
+        }, {
+          name: 'Team 3'
+        }, {
+          name: 'Team 2'
+        }, {
+          name: 'Team 1'
+        }, {
+          name: null
+        }, {
+          name: null
+        }, {
+          name: null
+        }]
+      }, {
+        order: '-name DESC',
+        step: 2,
+        expected: [{
+          name: 'Team 1'
+        }, {
+          name: 'Team 2'
+        }, {
+          name: 'Team 3'
+        }, {
+          name: 'Team 4'
+        }, {
+          name: 'Team 5'
+        }, {
+          name: null
+        }, {
+          name: null
+        }, {
+          name: null
+        }]
+      }]
 
-      it('should return the 2nd 2 teams', async () => {
-        const order = 'name'
-        let rows = await Team.query().after(order).select('teams.*').limit(2)
-        const { sortKey } = last(rows)
-        rows = await Team.query().after(order, sortKey).select('teams.*').limit(2)
-        const result = map(rows, 'name')
-        expect(result).to.eql([null, 'Team 1'])
-      })
-
-      it('should return the 3rd 2 teams', async () => {
-        const order = 'name'
-        let rows = await Team.query().after(order).select('teams.*').limit(4)
-        const { sortKey } = last(rows)
-        rows = await Team.query().after(order, sortKey).select('teams.*').limit(2)
-        const result = map(rows, 'name')
-        expect(result).to.eql(['Team 2', 'Team 3'])
-      })
-
-      it('should return the Last 2 teams', async () => {
-        const order = '-name'
-        const rows = await Team.query().after(order).select('teams.*').limit(2)
-        const result = map(rows, 'name')
-        expect(result).to.eql(['Team 5', 'Team 4'])
-      })
-
-      it('should return the 2nd to Last 2 teams', async () => {
-        const order = '-name'
-        let rows = await Team.query().after(order).select('teams.*').limit(2)
-        const { sortKey } = last(rows)
-        rows = await Team.query().after(order, sortKey).select('teams.*').limit(2)
-        const result = map(rows, 'name')
-        expect(result).to.eql(['Team 3', 'Team 2'])
-      })
-
-      it('should return the 3rd to Last 2 teams', async () => {
-        const order = '-name'
-        let rows = await Team.query().after(order).select('teams.*').limit(4)
-        const { sortKey } = last(rows)
-        rows = await Team.query().after(order, sortKey).select('teams.*').limit(2)
-        const result = map(rows, 'name')
-        expect(result).to.eql(['Team 1', null])
-      })
-
-      it('should return the 4th to Last 2 teams', async () => {
-        const order = '-name'
-        let rows = await Team.query().after(order).select('teams.*').limit(6)
-        const { sortKey } = last(rows)
-        rows = await Team.query().after(order, sortKey).select('teams.*').limit(2)
-        const result = map(rows, 'name')
-        expect(result).to.eql([null, null])
-      })
+      tests.forEach(runTest)
     })
 
     describe('multiple columns', () => {
-      const columns = ['name', '-archived']
+      const order = ['name', '-archived']
 
       beforeEach(async () => {
         const moreTeams = await Factory.create('team', times(5, (index) => ({
@@ -209,25 +239,53 @@ describe('Query @cleandb', () => {
         teams = [...teams, ...moreTeams]
       })
 
-      it('should return the 1st 3 teams', async () => {
-        const rows = await Team.query().after(columns).select('teams.*').limit(3)
+      const tests = [{
+        order: ['name', '-archived'],
+        step: 3,
+        expected: [{
+          archived: true,
+          name: 'Team 1'
+        }, {
+          archived: false,
+          name: 'Team 1'
+        }, {
+          archived: true,
+          name: 'Team 2'
+        }, {
+          archived: false,
+          name: 'Team 2'
+        }, {
+          archived: true,
+          name: 'Team 3'
+        }, {
+          archived: false,
+          name: 'Team 3'
+        }]
+      }, {
+        order: ['-name', 'archived'],
+        step: 3,
+        expected: [{
+          archived: false,
+          name: 'Team 5'
+        }, {
+          archived: true,
+          name: 'Team 5'
+        }, {
+          archived: false,
+          name: 'Team 4'
+        }, {
+          archived: true,
+          name: 'Team 4'
+        }, {
+          archived: false,
+          name: 'Team 3'
+        }, {
+          archived: true,
+          name: 'Team 3'
+        }]
+      }]
 
-        const names = map(rows, 'name')
-        const archiveds = map(rows, 'archived')
-        expect(names).to.eql(['Team 1', 'Team 1', 'Team 2'])
-        expect(archiveds).to.eql([true, false, true])
-      })
-
-      it('should return the 2nd 3 teams', async () => {
-        let rows = await Team.query().after(columns).select('teams.*').limit(3)
-        const { sortKey } = last(rows)
-        rows = await Team.query().after(columns, sortKey).select('teams.*').limit(3)
-
-        const names = map(rows, 'name')
-        const archiveds = map(rows, 'archived')
-        expect(names).to.eql(['Team 2', 'Team 3', 'Team 3'])
-        expect(archiveds).to.eql([false, true, false])
-      })
+      tests.forEach(runTest)
     })
   })
 
