@@ -49,6 +49,46 @@ class QueryBuilder extends KnexQueryBuilder {
     }
   }
 
+  // Update multiple rows at once
+  bulkUpdate (rows) {
+    const { primaryKey, tableName } = this
+    const { raw } = this.client
+
+    // Pull out changes
+    const changesByKey = {}
+    for (const row of rows) {
+      const id = row[primaryKey]
+      if (!id) throw new Error('Each row must have primaryKey')
+
+      const keys = Object.keys(row)
+      for (const key of keys) {
+        if (key === primaryKey) continue
+
+        const field = this.fields[key]
+        const value = mapFieldToDb(field, row[key])
+        changesByKey[key] = changesByKey[key] || []
+        changesByKey[key].push({ id, value })
+      }
+    }
+
+    // Create case statements
+    const keys = Object.keys(changesByKey)
+    for (const key of keys) {
+      const rows = changesByKey[key]
+      const whenSqls = rows.map(row => `WHEN ${row.id} THEN ?`)
+      const sql = `(CASE ${primaryKey} ${whenSqls.join(' ')} ELSE ${tableName}.${key} END)`
+      const bindings = rows.map(row => row.value)
+      this.update(key, raw(sql, bindings))
+    }
+
+    // Add updated_at?
+    if (this.fields.updatedAt) this.update('updatedAt', raw('NOW()'))
+
+    // Add where
+    const ids = rows.map(row => row[primaryKey])
+    return this.whereIn(primaryKey, ids)
+  }
+
   // Override then to format the result
   then (onFulfilled, onRejected) {
     return super.then((result) => {

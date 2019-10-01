@@ -337,4 +337,53 @@ describe('Query @cleandb', () => {
       })
     })
   })
+
+  describe('bulkUpdate', () => {
+    it('should sparsly update rows', async () => {
+      const teamIds = teams.map(t => t.id)
+
+      // Perform the update
+      await Team.query().bulkUpdate([
+        {
+          id: teamIds[0],
+          name: 'New Team'
+        },
+        {
+          id: teamIds[1],
+          name: 'Archived Team',
+          archived: true
+        },
+        {
+          id: teamIds[2],
+          name: 'Tagged Team',
+          tags: ['1A', '1B']
+        }
+      ])
+
+      // Read the results
+      const updatedTeams = await Team.query().whereIn('id', teamIds)
+      const { updatedAt } = updatedTeams[0]
+      expect(updatedTeams).to.eql([
+        {
+          ...teams[0],
+          name: 'New Team',
+          updatedAt
+        },
+        {
+          ...teams[1],
+          name: 'Archived Team',
+          archived: true,
+          updatedAt
+        },
+        {
+          ...teams[2],
+          name: 'Tagged Team',
+          tags: ['1A', '1B'],
+          updatedAt
+        },
+        teams[3],
+        teams[4]
+      ])
+    })
+  })
 })
