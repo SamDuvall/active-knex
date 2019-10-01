@@ -29,7 +29,8 @@ const wrapIdentifier = (value, origImpl, queryContext) => {
 
 module.exports = {
   arrayify,
-
   postProcessResponse,
+  toCamelCase,
+  toSnakeCase,
   wrapIdentifier
 }

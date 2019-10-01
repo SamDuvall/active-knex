@@ -6,7 +6,7 @@ const pick = require('lodash/pick')
 const KnexQueryBuilder = require('knex/lib/query/builder')
 const { mapFieldToDb, mapFieldsFromDb, mapFieldsToDb } = require('./fields')
 const { orderAfter, orderBy } = require('./sort')
-const { arrayify } = require('./util')
+const { arrayify, toSnakeCase } = require('./util')
 const SELECT_METHODS = ['select', 'first']
 
 const OPTIONS = ['fields', 'primaryKey', 'tableName']
@@ -76,7 +76,7 @@ class QueryBuilder extends KnexQueryBuilder {
     for (const key of keys) {
       const rows = changesByKey[key]
       const whenSqls = rows.map(row => `WHEN ${row.id} THEN ?`)
-      const sql = `(CASE ${primaryKey} ${whenSqls.join(' ')} ELSE ${tableName}.${key} END)`
+      const sql = `(CASE ${primaryKey} ${whenSqls.join(' ')} ELSE ${tableName}.${toSnakeCase(key)} END)`
       const bindings = rows.map(row => row.value)
       this.update(key, raw(sql, bindings))
     }
