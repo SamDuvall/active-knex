@@ -3,7 +3,11 @@ const reduce = require('lodash/reduce')
 
 const FIELD_TYPES = {
   boolean: {
-    fromDb: (value) => !!value,
+    fromDb: (value) => {
+      if (value === 0) return false
+      if (value === 1) return true
+      return value
+    },
     toDb: (value) => value
   },
 

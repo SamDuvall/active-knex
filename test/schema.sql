@@ -60,7 +60,7 @@ CREATE TABLE `teams` (
   `name` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `archived` tinyint(1) DEFAULT NULL,
+  `archived` tinyint(1) DEFAULT '0',
   `tags` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
