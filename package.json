@@ -18,7 +18,7 @@
     "url": "git@github.com:SamDuvall/active-knex.git"
   },
   "dependencies": {
-    "knex": "SamDuvall/knex#schema-0.19.0",
+    "knex": "^0.19.0",
     "lodash": "^4.17.14",
     "mysql": "^2.17.1",
     "underscore": "^1.9.1",

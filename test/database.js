@@ -1,6 +1,8 @@
 /* global after before beforeEach */
 const flatMap = require('lodash/flatMap')
 const values = require('lodash/values')
+const { resetSchema } = require('..')
+const dbConfig = require('../knexfile').test
 const knex = require('./knex')
 
 // Tables
@@ -15,7 +17,7 @@ const truncateTables = (tables) => knex.transaction(async (trx) => {
 })
 
 // Operations
-const loadSchema = () => knex.schemaLoader.reset()
+const loadSchema = () => resetSchema(dbConfig)
 const cleanDatabase = () => truncateTables(tablesCache)
 
 // Create the database
